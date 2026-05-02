@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">📊 Dashboard</h2>
+
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total de Ventas</h5>
+                    <h2>${{ ingresos_totales|floatformat:2 }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Transacciones</h5>
+                    <h2>{{ total_ventas }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Productos Finales</h5>
+                    <h2>{{ productos_finales }}</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Bajo Stock</h5>
+                    <h2 class="text-warning">{{ productos_bajo_stock }}</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Top Productos</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="topProductosChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Ventas por Día</h5>
+                </div>
+                <div class="card-body">
+                    <canvas id="ventasPorDiaChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script>
+// Gráfico de top productos
+var topCtx = document.getElementById('topProductosChart').getContext('2d');
+new Chart(topCtx, {
+    type: 'bar',
+    data: {
+        labels: [{% for item in top_productos %}'{{ item.id_producto_final__nombre }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Cantidad Vendida',
+            data: [{% for item in top_productos %}{{ item.total }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            backgroundColor: 'rgba(75, 192, 192, 0.6)',
+            borderColor: 'rgba(75, 192, 192, 1)',
+            borderWidth: 1
+        }]
+    },
+    options: { responsive: true }
+});
+
+// Gráfico de ventas por día
+var ventasCtx = document.getElementById('ventasPorDiaChart').getContext('2d');
+new Chart(ventasCtx, {
+    type: 'line',
+    data: {
+        labels: [{% for item in ventas_por_dia %}'{{ item.fecha }}'{% if not forloop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            label: 'Ingresos por Día',
+            data: [{% for item in ventas_por_dia %}{{ item.total }}{% if not forloop.last %},{% endif %}{% endfor %}],
+            borderColor: 'rgba(153, 102, 255, 1)',
+            backgroundColor: 'rgba(153, 102, 255, 0.1)',
+            tension: 0.4
+        }]
+    },
+    options: { responsive: true }
+});
+</script>
+{% endblock %}
+{% endblock %}

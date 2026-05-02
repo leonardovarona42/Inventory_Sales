@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+
+{% block title %}Punto de Venta - Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <h2>💳 Punto de Venta (POS)</h2>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Productos -->
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5>Productos Disponibles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        {% for producto in productos %}
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100">
+                                {% if producto.imagen %}
+                                    <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 150px; object-fit: cover;">
+                                {% else %}
+                                    <div class="card-img-top bg-secondary" style="height: 150px; display: flex; align-items: center; justify-content: center;">
+                                        <span class="text-white">Sin imagen</span>
+                                    </div>
+                                {% endif %}
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ producto.nombre }}</h6>
+                                    <p class="card-text">
+                                        <strong>${{ producto.precio_actual|floatformat:2 }}</strong>
+                                    </p>
+                                    <button class="btn btn-sm btn-success w-100" onclick="agregarCarrito({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio_actual }})">
+                                        Agregar al Carrito
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="alert alert-warning">No hay productos disponibles</div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Carrito -->
+        <div class="col-md-4">
+            <div class="card sticky-top" style="top: 80px;">
+                <div class="card-header bg-primary text-white">
+                    <h5>🛒 Carrito de Compras</h5>
+                </div>
+                <div class="card-body">
+                    <div id="carrito-items">
+                        {% if carrito %}
+                            {% for id, item in carrito.items %}
+                            <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
+                                <div>
+                                    <strong>{{ item.nombre }}</strong><br>
+                                    <small>Cantidad: {{ item.cantidad }}</small>
+                                </div>
+                                <div>
+                                    <strong>${{ item.precio }}</strong>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <p class="text-muted">Carrito vacío</p>
+                        {% endif %}
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <h6>Total:</h6>
+                        <h6><strong>${{ total|floatformat:2 }}</strong></h6>
+                    </div>
+                    <form method="post" action="#">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label for="metodo_pago" class="form-label">Método de Pago:</label>
+                            <select class="form-control" name="metodo_pago" id="metodo_pago">
+                                <option value="efectivo">Efectivo</option>
+                                <option value="tarjeta">Tarjeta</option>
+                                <option value="transferencia">Transferencia</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Registrar Venta</button>
+                        <button type="reset" class="btn btn-danger w-100 mt-2">Limpiar Carrito</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function agregarCarrito(id, nombre, precio) {
+    // Aquí irá la lógica de AJAX para agregar al carrito
+    console.log('Agregando:', nombre, precio);
+}
+</script>
+{% endblock %}

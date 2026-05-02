@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block title %}Detalle de Venta{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-3">Venta #{{ venta.id }}</h2>
+    <div class="card mb-3">
+        <div class="card-body">
+            <p><strong>Fecha:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+            <p><strong>Metodo de pago:</strong> {{ venta.get_metodo_pago_display }}</p>
+            <p><strong>Total:</strong> ${{ venta.total_pagado|floatformat:2 }}</p>
+        </div>
+    </div>
+    <h5>Detalles</h5>
+    <ul class="list-group">
+        {% for detalle in venta.detalles.all %}
+        <li class="list-group-item d-flex justify-content-between">
+            <span>{{ detalle.id_producto_final.nombre }} x {{ detalle.cantidad }}</span>
+            <span>${{ detalle.precio_unitario|floatformat:2 }}</span>
+        </li>
+        {% empty %}
+        <li class="list-group-item">Sin detalles.</li>
+        {% endfor %}
+    </ul>
+</div>
+{% endblock %}
