@@ -14,34 +14,44 @@
         <!-- Productos -->
         <div class="col-md-8">
             <div class="card">
-                <div class="card-header">
-                    <h5>Productos Disponibles</h5>
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">📦 Productos Disponibles</h5>
+                    <span class="badge bg-light text-dark fs-6" id="productos-count">{{ productos|length }} productos</span>
                 </div>
                 <div class="card-body">
-                    <div class="row">
+                    <div class="row" id="productos-grid">
                         {% for producto in productos %}
                         <div class="col-md-4 mb-3">
-                            <div class="card h-100">
+                            <div class="card h-100 producto-card shadow-sm border-0" style="cursor: pointer; transition: all 0.2s;" onclick="agregarAlCarrito({{ producto.id }})" onmouseenter="this.style.transform='translateY(-5px)';this.style.boxShadow='0 8px 25px rgba(0,0,0,0.15)'" onmouseleave="this.style.transform='';this.style.boxShadow=''">
                                 {% if producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 150px; object-fit: cover;">
+                                    <img src="{{ producto.imagen.url }}" class="card-img-top" alt="{{ producto.nombre }}" style="height: 140px; object-fit: cover; border-bottom: 1px solid #e9ecef;">
                                 {% else %}
-                                    <div class="card-img-top bg-secondary" style="height: 150px; display: flex; align-items: center; justify-content: center;">
-                                        <span class="text-white">Sin imagen</span>
+                                    <div class="card-img-top bg-light bg-gradient d-flex align-items-center justify-content-center" style="height: 140px;">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="#adb5bd" viewBox="0 0 16 16">
+                                            <path d="M4 3.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3 0a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1zm-9 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3.5-.5a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1z"/>
+                                        </svg>
                                     </div>
                                 {% endif %}
-                                <div class="card-body">
-                                    <h6 class="card-title">{{ producto.nombre }}</h6>
-                                    <p class="card-text">
-                                        <strong>${{ producto.precio_actual|floatformat:2 }}</strong>
-                                    </p>
-                                    <button class="btn btn-sm btn-success w-100" onclick="agregarCarrito({{ producto.id }}, '{{ producto.nombre }}', {{ producto.precio_actual }})">
-                                        Agregar al Carrito
-                                    </button>
+                                <div class="card-body pt-2">
+                                    <h6 class="card-title fw-bold text-truncate" title="{{ producto.nombre }}">{{ producto.nombre }}</h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fs-4 fw-bold text-primary">${{ producto.precio_actual|floatformat:2 }}</span>
+                                        <span class="badge bg-success rounded-pill">Stock: {{ producto.stock_actual|default:0 }}</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         {% empty %}
-                        <div class="alert alert-warning">No hay productos disponibles</div>
+                        <div class="col-12">
+                            <div class="alert alert-warning text-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16" class="me-2">
+                                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
+                                    <path d="M8 4a.5.5 0 0 1 .5.5v5a.5.5 0 0 1-1 0v-5A.5.5 0 0 1 8 4z"/>
+                                    <path d="M8 12a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                                </svg>
+                                No hay productos disponibles
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -50,56 +60,202 @@
 
         <!-- Carrito -->
         <div class="col-md-4">
-            <div class="card sticky-top" style="top: 80px;">
-                <div class="card-header bg-primary text-white">
-                    <h5>🛒 Carrito de Compras</h5>
+            <div class="card sticky-top" style="top: 80px; border: none; box-shadow: 0 10px 30px rgba(0,0,0,0.1);">
+                <div class="card-header bg-gradient text-white py-3" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0 d-flex align-items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+                                <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM3.102 4l1.313 7h8.17l1.313-7H3.102zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                            </svg>
+                            Carrito
+                        </h5>
+                        <span class="badge bg-white text-purple fs-6" id="cart-count-badge">0 items</span>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div id="carrito-items">
-                        {% if carrito %}
-                            {% for id, item in carrito.items %}
-                            <div class="d-flex justify-content-between mb-2 pb-2 border-bottom">
-                                <div>
-                                    <strong>{{ item.nombre }}</strong><br>
-                                    <small>Cantidad: {{ item.cantidad }}</small>
-                                </div>
-                                <div>
-                                    <strong>${{ item.precio }}</strong>
-                                </div>
-                            </div>
-                            {% endfor %}
-                        {% else %}
-                            <p class="text-muted">Carrito vacío</p>
-                        {% endif %}
+                <div class="card-body p-0" style="max-height: 500px; overflow-y: auto;">
+                    <div id="carrito-items" class="p-3">
+                        <div class="text-center text-muted py-5">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="mb-2 opacity-50">
+                                <path d="M14 3H2v1l1.21 9.142A2 2 0 0 0 5.005 14h5.99a2 2 0 0 0 1.79-1.858L14 4V3zM2 2h12v1H2V2z"/>
+                            </svg>
+                            <p class="mb-0">Carrito vacío</p>
+                            <small class="text-muted">Agrega productos desde la izquierda</small>
+                        </div>
                     </div>
-                    <hr>
-                    <div class="d-flex justify-content-between mb-3">
-                        <h6>Total:</h6>
-                        <h6><strong>${{ total|floatformat:2 }}</strong></h6>
-                    </div>
-                    <form method="post" action="#">
-                        {% csrf_token %}
+                    <div class="border-top p-3" id="resumen-carrito" style="display: none;">
+                        <div class="d-flex justify-content-between mb-2">
+                            <small class="text-muted">Subtotal</small>
+                            <small id="subtotal">$0.00</small>
+                        </div>
+                        <hr class="my-2">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">Total</h5>
+                            <h4 class="mb-0 text-primary fw-bold" id="total-carrito">$0.00</h4>
+                        </div>
                         <div class="mb-3">
-                            <label for="metodo_pago" class="form-label">Método de Pago:</label>
-                            <select class="form-control" name="metodo_pago" id="metodo_pago">
-                                <option value="efectivo">Efectivo</option>
-                                <option value="tarjeta">Tarjeta</option>
-                                <option value="transferencia">Transferencia</option>
+                            <label class="form-label fw-semibold small">Método de Pago</label>
+                            <select class="form-select form-select-sm" id="metodo_pago">
+                                <option value="efectivo">💵 Efectivo</option>
+                                <option value="tarjeta">💳 Tarjeta</option>
+                                <option value="transferencia">🏦 Transferencia</option>
+                                <option value="otro">✨ Otro</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Registrar Venta</button>
-                        <button type="reset" class="btn btn-danger w-100 mt-2">Limpiar Carrito</button>
-                    </form>
+                        <div class="d-grid gap-2">
+                            <button onclick="procesarVenta()" class="btn btn-success btn-lg py-2 fw-semibold shadow-sm" style="background: linear-gradient(135deg, #28a745 0%, #218838 100%); border: none;">
+                                <span id="btn-procesar-text">💰 Procesar Venta</span>
+                                <span id="btn-procesar-spinner" class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            </button>
+                            <button onclick="limpiarCarrito()" class="btn btn-outline-danger btn-sm py-2">
+                                🗑️ Limpiar Carrito
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<div class="toast-container position-fixed bottom-0 end-0 p-3" style="z-index: 9999;">
+    <div id="toast-success" class="toast align-items-center text-white bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-success-msg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+    <div id="toast-error" class="toast align-items-center text-white bg-danger border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-error-msg"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
 <script>
-function agregarCarrito(id, nombre, precio) {
-    // Aquí irá la lógica de AJAX para agregar al carrito
-    console.log('Agregando:', nombre, precio);
+let carrito = JSON.parse('{{ carrito_json|escapejs }}' || '{}');
+
+$(document).ready(function() {
+    actualizarVistaCarrito();
+    window.toastSuccess = new bootstrap.Toast(document.getElementById('toast-success'));
+    window.toastError = new bootstrap.Toast(document.getElementById('toast-error'));
+});
+
+function agregarAlCarrito(productoId) {
+    $.ajax({
+        url: '{% url "ajax_agregar_carrito" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: { producto_id: productoId, cantidad: 1 },
+        success: function(res) {
+            if (res.success) {
+                carrito = res.carrito || carrito;
+                actualizarVistaCarrito();
+                mostrarToast('success', '✅ Producto agregado');
+            } else {
+                mostrarToast('error', '❌ ' + res.error);
+            }
+        }
+    });
+}
+
+function quitarDelCarrito(productoId) {
+    $.ajax({
+        url: '{% url "ajax_quitar_carrito" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: { producto_id: productoId },
+        success: function(res) {
+            if (res.success) {
+                carrito = res.carrito || {};
+                actualizarVistaCarrito();
+                mostrarToast('success', '🗑️ Eliminado');
+            }
+        }
+    });
+}
+
+function limpiarCarrito() {
+    if (!carrito || Object.keys(carrito).length === 0) return;
+    if (!confirm('¿Limpiar todo el carrito?')) return;
+    $.ajax({
+        url: '{% url "ajax_limpiar_carrito" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        success: function(res) {
+            if (res.success) {
+                carrito = {};
+                actualizarVistaCarrito();
+                mostrarToast('success', '🗑️ Carrito limpio');
+            }
+        }
+    });
+}
+
+function procesarVenta() {
+    let btnText = $('#btn-procesar-text');
+    let btnSpinner = $('#btn-procesar-spinner');
+    if (!carrito || Object.keys(carrito).length === 0) {
+        mostrarToast('error', '❌ Carrito vacío');
+        return;
+    }
+    btnText.addClass('d-none');
+    btnSpinner.removeClass('d-none');
+    $.ajax({
+        url: '{% url "ajax_procesar_venta" %}',
+        method: 'POST',
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        data: { metodo_pago: $('#metodo_pago').val() },
+        success: function(res) {
+            if (res.success) {
+                carrito = {};
+                actualizarVistaCarrito();
+                mostrarToast('success', '✅ Venta registrada! Orden: ' + res.orden_id);
+            } else {
+                mostrarToast('error', '❌ ' + res.error);
+            }
+        },
+        error: function() {
+            mostrarToast('error', '❌ Error al procesar');
+        },
+        complete: function() {
+            btnText.removeClass('d-none');
+            btnSpinner.addClass('d-none');
+        }
+    });
+}
+
+function actualizarVistaCarrito() {
+    let items = Object.values(carrito);
+    let totalItems = items.reduce((s, i) => s + i.cantidad, 0);
+    let total = items.reduce((s, i) => s + (parseFloat(i.precio) * i.cantidad), 0);
+    $('#cart-count-badge').text(totalItems + ' items');
+    let html = '';
+    if (items.length === 0) {
+        html = '<div class="text-center text-muted py-5"><svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" viewBox="0 0 16 16" class="mb-2 opacity-50"><path d="M14 3H2v1l1.21 9.142A2 2 0 0 0 5.005 14h5.99a2 2 0 0 0 1.79-1.858L14 4V3zM2 2h12v1H2V2z"/></svg><p class="mb-0">Carrito vacío</p><small class="text-muted">Agrega productos</small></div>';
+        $('#resumen-carrito').hide();
+    } else {
+        items.forEach(item => {
+            html += '<div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom"><div><strong class="text-truncate d-block" style="max-width:150px">' + item.nombre + '</strong><small class="text-muted">x' + item.cantidad + '</small></div><div class="text-end"><strong>$' + parseFloat(item.precio).toFixed(2) + '</strong><br><small class="text-danger" style="cursor:pointer" onclick="quitarDelCarrito(' + item.id + ')">❌</small></div></div>';
+        });
+        $('#resumen-carrito').show();
+        $('#subtotal').text('$' + total.toFixed(2));
+        $('#total-carrito').text('$' + total.toFixed(2));
+    }
+    $('#carrito-items').html(html);
+}
+
+function mostrarToast(tipo, mensaje) {
+    let toast = tipo === 'success' ? window.toastSuccess : window.toastError;
+    let msgEl = tipo === 'success' ? $('#toast-success-msg') : $('#toast-error-msg');
+    msgEl.html(mensaje);
+    toast.show();
 }
 </script>
+
+<style>
+.producto-card:hover { border-color: var(--bs-primary) !important; }
+.bg-gradient { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; }
+.fs-4 { font-size: 1.4rem; }
+</style>
 {% endblock %}
