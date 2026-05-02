@@ -4,7 +4,7 @@ Sistema web en Django para gestionar inventario de insumos, recetas de productos
 
 ## Estado actual del proyecto
 
-Implementado (alineado al MVP de `instrucciones.md`):
+Implementado 
 
 - Gestion de insumos y proveedores (`productos`).
 - Gestion de recetas y productos finales (`recetas`).
