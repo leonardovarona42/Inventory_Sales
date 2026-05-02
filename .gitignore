@@ -1,0 +1,97 @@
+ # Entorno virtual
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Base de datos (importante: no subir SQLite local)
+db.sqlite3
+*.db
+*.sqlite3
+
+# Archivos media (imágenes subidas por usuarios)
+/media/
+/recetas_imagenes/
+/productos_imagenes/
+
+# Archivos estáticos recolectados
+/staticfiles/
+/static/
+
+# Variables de entorno y secretos
+.env
+.env.local
+.env.production
+secrets.json
+config.local.py
+
+# Django específico
+*.log
+*.pot
+*.mo
+local_settings.py
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Archivos de logs
+logs/
+*.log
+
+# Archivos temporales del sistema
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Reportes generados
+*.pdf
+*.xlsx
+reportes_exportados/
+
+# Tests
+.coverage
+htmlcov/
+.pytest_cache/
+.tox/
+
+# Celery (si usás)
+celerybeat-schedule
+celerybeat.pid
+
+# Notebooks Jupyter (si usás)
+.ipynb_checkpoints/
+*.ipynb
+
+# Archivos de backup de Windows
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Archivos comprimidos temporales
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# Archivos de instrucciones (no subir al repo)
+instrucciones.md
+INSTRUCCIONES.md
