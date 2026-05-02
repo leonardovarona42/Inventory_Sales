@@ -75,21 +75,11 @@ class DetalleVenta(models.Model):
         return f"{self.id_producto_final.nombre} x {self.cantidad}"
 
     def save(self, *args, **kwargs):
-        # Usar el precio actual del producto si no se especificó
-        if not self.precio_unitario:
+        # El stock se descontará en services.py dentro de transacción atómica
+        # Solo guardar, sin lógica de stock aquí
+        if not self.precio_unitario and self.id_producto_final:
             self.precio_unitario = self.id_producto_final.precio_actual
-
-        with transaction.atomic():
-            # Validar que haya suficiente stock
-            self._verificar_stock()
-
-            # Registrar el cambio en la base de datos antes de descontar stock
-            es_nueva = not self.pk
-            super().save(*args, **kwargs)
-
-            # Descontar stock y registrar movimientos solo si es nuevo
-            if es_nueva:
-                self._descontar_stock()
+        super().save(*args, **kwargs)
 
     def _verificar_stock(self):
         """Verifica que haya suficiente stock de todos los insumos"""
