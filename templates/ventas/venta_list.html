@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block title %}Ventas - Gestión de Inventario{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">💰 Ventas</h2>
+
+    {% if ventas %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead class="table-dark">
+                    <tr>
+                        <th>ID</th>
+                        <th>Orden</th>
+                        <th>Fecha</th>
+                        <th>Método de Pago</th>
+                        <th>Total</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for venta in ventas %}
+                    <tr>
+                        <td>{{ venta.id }}</td>
+                        <td>{{ venta.orden.numero_orden|default:"Sin orden" }}</td>
+                        <td>{{ venta.fecha_venta|date:"d/m/Y H:i" }}</td>
+                        <td>{{ venta.get_metodo_pago_display }}</td>
+                        <td>${{ venta.total_pagado|floatformat:2 }}</td>
+                        <td>
+                            <a href="{% url 'venta_detail' venta.id %}" class="btn btn-sm btn-info">Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">No hay ventas registradas aún.</div>
+    {% endif %}
+</div>
+{% endblock %}

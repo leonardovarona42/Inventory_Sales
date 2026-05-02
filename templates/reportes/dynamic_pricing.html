@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Precios Dinamicos{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <h2 class="mb-4">Reporte de Precios Dinamicos</h2>
+
+    <h5>Productos</h5>
+    <table class="table table-sm table-striped mb-4">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Base</th>
+                <th>Actual</th>
+                <th>Umbral</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for producto in productos %}
+            <tr>
+                <td>{{ producto.nombre }}</td>
+                <td>${{ producto.precio_base|floatformat:2 }}</td>
+                <td>${{ producto.precio_actual|floatformat:2 }}</td>
+                <td>{{ producto.umbral_demanda_alta }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <h5>Historial reciente</h5>
+    <table class="table table-sm">
+        <thead>
+            <tr>
+                <th>Fecha</th>
+                <th>Producto</th>
+                <th>Antes</th>
+                <th>Nuevo</th>
+                <th>Razon</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for cambio in historial %}
+            <tr>
+                <td>{{ cambio.fecha|date:"d/m/Y H:i" }}</td>
+                <td>{{ cambio.producto.nombre }}</td>
+                <td>${{ cambio.precio_anterior|floatformat:2 }}</td>
+                <td>${{ cambio.precio_nuevo|floatformat:2 }}</td>
+                <td>{{ cambio.get_razon_display }}</td>
+            </tr>
+            {% empty %}
+            <tr><td colspan="5">Sin cambios registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}
