@@ -224,6 +224,13 @@ Propietaria. Todos los derechos reservados.
 
 **Inventory Sales v4.0** — Construido con Django y TailwindCSS
 
+---
+
+Desarrollado por **Leonardo L. Varona Tabares**
+
+[![Email](https://img.shields.io/badge/Email-leonardovarona42@gmail.com-D14836?logo=gmail&logoColor=white)](mailto:leonardovarona42@gmail.com)
+[![Phone](https://img.shields.io/badge/Phone-%2B53%205800%203511-25D366?logo=whatsapp&logoColor=white)](tel:+5358003511)
+
 Hecho con ❤️ para negocios que necesitan control real
 
 </div>
