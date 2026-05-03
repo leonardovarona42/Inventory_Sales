@@ -1,369 +1,229 @@
-# 🏪 Sistema de Gestión Integral de Inventario, Recetas, Órdenes y Ventas
+# 🏪 Inventory Sales — Sistema de Gestión de Inventario y Punto de Venta
 
-## 📄 Descripción del Proyecto
+> Sistema web moderno para gestión de inventario, ventas y punto de venta (POS). Diseñado para negocios que necesitan control de stock, ventas rápidas y gestión de usuarios con una interfaz limpia y responsiva.
 
-**Inventory Sales** es una solución empresarial completa diseñada para negocios del sector gastronómico, retail y producción que requieren control preciso de inventario compuesto, gestión de recetas, seguimiento de órdenes y registro de ventas con precios dinámicos.
+<div align="center">
 
-Desarrollado con **Django 6+** y **Bootstrap 5**, este sistema ofrece una arquitectura escalable, segura y modular que permite a negocios como restaurantes, panaderías, dark kitchens y producción alimentaria gestionar operaciones críticas con trazabilidad completa y protección de datos.
+![Django](https://img.shields.io/badge/Django-6.0-0C4B33?logo=django&logoColor=white)
+![Python](https://img.shields.io/badge/Python-3.13-3776AB?logo=python&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-336791?logo=postgresql&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/TailwindCSS-3.0-06B6D4?logo=tailwindcss&logoColor=white)
+![License](https://img.shields.io/badge/License-Proprietary-red)
+
+</div>
 
 ---
 
-## ✨ Características Principales
+## ✨ Características
 
-### 🎯 Core Business Features
-- **Gestión de Inventario Compuesto**: Control de insumos y materias primas con trazabilidad completa
-- **Recetas y Fórmulas**: Gestión de productos finales con cálculo automático de costos
-- **Punto de Venta (POS)**: Interfaz rápida para registro de pedidos y ventas
-- **Órdenes de Trabajo**: Flujo de estados (pendiente → preparando → listo → entregado)
-- **Ventas con Métodos de Pago**: Efectivo, tarjeta, transferencia
-- **Precios Dinámicos**: Ajuste automático basado en demanda
-- **Movimientos de Stock**: Registro detallado de entradas/salidas por cada transacción
+### 🛒 Punto de Venta (POS)
+- Interfaz rápida con búsqueda en tiempo real y filtros por categoría
+- Carrito de compras con actualización instantánea
+- Múltiples métodos de pago: efectivo, tarjeta, transferencia
+- Diseño responsivo: funciona en desktop, tablet y móvil
+- Descuento automático de stock al confirmar venta
 
-### 🔒 Seguridad y Auditoría
-- **Transacciones Atómicas**: Rollback automático en operaciones críticas
-- **Control de Roles**: Cajero, Chef, Administrador, Superadmin
-- **Registro Completo**: Trazabilidad de todos los cambios en el sistema
-- **Soft Delete**: Borrado lógico para preservar histórico
-- **CSRF Protection**: Seguridad integrada Django
+### 📦 Inventario
+- Categorías jerárquicas (categoría principal → subcategorías)
+- Control de stock actual y stock mínimo con alertas
+- Registro de movimientos de entrada y salida
+- Trazabilidad completa de cada transacción
 
-### 📊 Reporting & Analytics
-- Dashboard con KPIs principales
+### 👥 Gestión de Usuarios
+- **Superadmin**: acceso total, reportes, gestión de usuarios
+- **Administrador**: inventario, productos, proveedores, movimientos
+- **Cajero**: punto de venta y registro de ventas
+
+### 📊 Dashboard
+- Ventas del día y métricas principales
 - Productos más vendidos
-- Alertas de stock crítico
-- Valor de inventario
-- Reportes por rangos de fecha
-- Gráficos interactivos con Chart.js
+- Alertas de stock bajo
+- Reportes por rango de fechas
+
+### 📱 Responsivo
+- Sidebar colapsable en móvil con overlay
+- POS optimizado para pantallas táctiles
+- Carrito móvil como bottom sheet deslizable
+- Grid de productos adaptativo (2-3-4 columnas)
 
 ---
 
-## 🏗️ Arquitectura del Sistema
+## 🏗️ Estructura del Proyecto
 
 ```
-inventory_sales/
-├── config/                          # Configuración Django
-│   ├── settings.py                  # Settings
-│   ├── urls.py                      # Rutas principales
-│   └── wsgi.py                      # WSGI
-├── DOCS/                            # 🆕 Documentación de procesos
-│   ├── FLUJOS_ROLES.md             # Guías por rol de usuario
-│   └── ARQUITECTURA.md             # Detalles técnicos
-├── productos/                       # Insumos y materias primas
-│   ├── models.py                    # Modelo Producto
+Inventory_Sales/
+├── Inventory_Sales/          # Configuración principal
+│   ├── settings.py           # Settings (DB, apps, middleware)
+│   ├── urls.py               # Rutas globales
+│   └── wsgi.py               # WSGI config
+├── productos/                # Productos y categorías
+│   ├── models.py             # Producto, Categoria, Proveedor
+│   ├── forms.py              # Formularios con widgets estilizados
+│   └── admin.py              # Admin registrado
+├── inventario/               # Movimientos de stock
+│   ├── models.py             # MovimientoStock
+│   └── views.py              # Listado y filtros
+├── ventas/                   # Punto de venta y ventas
+│   ├── models.py             # Venta, DetalleVenta
+│   ├── services.py           # Lógica transaccional de venta
+│   ├── views.py              # POS, AJAX, listados
+│   └── tests.py              # Tests unitarios
+├── usuarios/                 # Autenticación y gestión
+│   ├── models.py             # UsuarioPerfil
+│   ├── forms.py              # UsuarioForm, CambiarPasswordForm
+│   └── views.py              # CRUD de usuarios, perfil
+├── templates/                # Templates HTML
+│   ├── base.html             # Layout principal con sidebar
+│   ├── ventas/pos.html       # Interfaz del punto de venta
 │   └── ...
-├── recetas/                         # Productos finales y fórmulas
-│   ├── models.py                    # ProductoFinal, DetalleReceta
-│   └── ...
-├── inventario/                      # Movimientos y stock
-│   ├── models.py                    # MovimientoStock
-│   └── ...
-├── ordenes/                         # Órdenes de pedido
-│   ├── models.py                    # Orden (estados: pendiente→entregado)
-│   ├── views.py                     # POS, lista, creación
-│   └── ...
-├── ventas/                          # Transacciones de venta
-│   ├── models.py                    # Venta, DetalleVenta
-│   ├── services.py                  # 🆕 Lógica de negocio (transaccional)
-│   └── ...
-├── usuarios/                        # Gestión de usuarios y roles
-│   ├── views.py                     # Registro, autenticación
-│   └── ...
-├── templates/                       # Templates base y componentes
-│   ├── base.html                    # Layout principal
-│   ├── registration/                # Login, logout
-│   └── ...
-└── DOCS/                            # 📚 Documentación
-    ├── FLUJOS_ROLES.md             # Procesos por rol
-    └── README.md                    # Este archivo
+└── populate_categories.py    # Script de seeding inicial
 ```
-
----
-
-## 🔐 Modelo de Datos Principal
-
-### Entidades Clave
-
-**Producto** (Insumo/Materia Prima)
-- Stock actual
-- Unidad de medida
-- Proveedor
-- Historial de precios
-
-**ProductoFinal** (Artículo vendible)
-- Receta asociada
-- Precio actual (dinámico)
-- Imagen
-- Descripción
-
-**Orden** (Pedido)
-- Número secuencial único
-- Cliente (nombre, teléfono)
-- Estado: pendiente → preparando → listo → entregado → cancelado
-- Total
-
-**Venta** (Transacción)
-- Método de pago
-- Total pagado
-- Items (DetalleVenta)
-- UnaOrden (OneToOne)
-
-**MovimientoStock** (Auditoría)
-- Entrada/Salida
-- Cantidad
-- Motivo (compra, venta, ajuste, merma)
-- Referencia (orden/venta)
-
----
-
-## 🎭 Roles y Permisos
-
-| Rol | Permisos | Acceso Especial |
-|-----|----------|-----------------|
-| **Cajero** | POS, Ventas, Órdenes (estado limitado) | - |
-| **Chef** | Recetas, ProductosFinal, Dashboard | Demanda, costos |
-| **Administrador** | TODO + Inventario, Precios, Reportes | Ajustes, proveedores |
-| **Superadmin** | TODO + Usuarios, Config, Logs | Sistema completo |
 
 ---
 
 ## 🚀 Stack Tecnológico
 
-### Backend
-- **Python 3.13**
-- **Django 6.0.4** (Framework web)
-- **Django ORM** (Base de datos)
-- **PostgreSQL** (Producción) / SQLite (Dev)
-
-### Frontend
-- **Bootstrap 5** (UI/UX)
-- **Chart.js** (Visualización)
-- **Vanilla JS** (Interactividad)
-
-### Seguridad
-- **Django Auth** (Autenticación)
-- **CSRF Tokens** (Protección)
-- **Password Validators** (Seguridad)
-- **HTTPS Ready** (Producción)
+| Capa | Tecnología |
+|------|------------|
+| **Backend** | Python 3.13, Django 6.0 |
+| **Base de datos** | PostgreSQL (producción) / SQLite (dev) |
+| **Frontend** | TailwindCSS (CDN), Font Awesome 6, Vanilla JS |
+| **Auth** | Django Authentication, Groups & Permissions |
+| **Testing** | Django TestCase |
 
 ---
 
-## 📦 Instalación y Configuración
+## 📦 Instalación Rápida
 
-### Requisitos Previos
+### 1. Clonar y preparar
 ```bash
-# Python 3.13+
-# PostgreSQL (recomendado)
-# Git
-```
-
-### Pasos de Instalación
-
-#### 1. Clonar el repositorio
-```bash
-git clone <repository-url>
+git clone https://github.com/leonardovarona42/Inventory_Sales.git
 cd Inventory_Sales
-```
-
-#### 2. Crear entorno virtual
-```bash
 python -m venv venv
-source venv/bin/activate  # Linux/Mac
-# venv\Scripts\activate   # Windows
-```
-
-#### 3. Instalar dependencias
-```bash
+venv\Scripts\activate          # Windows
+# source venv/bin/activate     # Linux/Mac
 pip install -r requirements.txt
 ```
 
-#### 4. Configurar base de datos
+### 2. Configurar base de datos
+Edita `Inventory_Sales/settings.py`:
 ```python
-# Inventory_Sales/settings.py
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'inventory_sales',
         'USER': 'postgres',
-        'PASSWORD': 'your_password',
+        'PASSWORD': 'tu_password',
         'HOST': 'localhost',
         'PORT': '5432',
     }
 }
 ```
 
-#### 5. Aplicar migraciones
+### 3. Migrar y poblar
 ```bash
 python manage.py makemigrations
 python manage.py migrate
+python manage.py populate_categories   # Categorías y productos ejemplo
+python manage.py setup_groups          # Roles: Superadmin, Admin, Cajero
+python manage.py createsuperuser       # Usuario administrador
 ```
 
-#### 6. Crear superusuario
-```bash
-python manage.py createsuperuser
-```
-
-#### 7. Correr servidor de desarrollo
+### 4. Ejecutar
 ```bash
 python manage.py runserver
 ```
+Abre [http://localhost:8000](http://localhost:8000)
 
-#### 8. Acceder al sistema
+---
+
+## 🎯 Flujo de Uso
+
 ```
-http://localhost:8000
+1. Superadmin crea usuarios y asigna roles
+2. Admin gestiona productos, categorías y proveedores
+3. Cajero abre el POS, busca productos y crea ventas
+4. Al confirmar: stock se descuenta automáticamente
+5. Dashboard muestra métricas en tiempo real
 ```
 
 ---
 
-## 🏭 Flujo de Negocio Principal
+## 🧪 Tests
 
-### 1. Configurar Productos e Insumos
-```
-Admin → Productos → Añadir insumos
-Admin → Recetas → Crear productos finales con fórmulas
+```bash
+python manage.py test ventas --verbosity=2
 ```
 
-### 2. Tomar Pedidos (POS)
-```
-Cajero → POS → Seleccionar productos → Agregar al carrito
-         → Crear orden → Estado: Pendiente
-```
-
-### 3. Preparar Ordenes
-```
-Chef → Órdenes → Cambiar estado: Preparando → Listo
-      → Notificar a Cajero
-```
-
-### 4. Registrar Venta
-```
-Cajero → Ventas → Seleccionar orden → Método de pago
-        → Confirmar
-        ↓
-        ✅ Stock descontado automáticamente
-        ✅ Movimientos registrados
-        ✅ Venta confirmada
-```
-
-### 5. Entregar al Cliente
-```
-Cajero/Chef → Cambiar estado: Entregado
-           → Cerrar orden
-```
+Cobertura actual:
+- ✅ Procesar venta exitosa
+- ✅ Validación de stock insuficiente
+- ✅ Cancelar venta revierte stock
+- ✅ Cálculo correcto del total
 
 ---
 
-## 🎯 Casos de Uso Principales
+## 📱 Capturas de Funcionalidad
 
-### 🍔 Restaurante / Cafetería
-- Menú con precios dinámicos
-- Gestión de recetas
-- Control de porciones
-- Pedidos en barra/mesa
+### POS (Desktop)
+- Búsqueda full width arriba
+- Categorías con scroll horizontal
+- Grid de productos 3-4 columnas
+- Carrito lateral derecho fijo
 
-### 🥐 Panadería
-- Producción programada
-- Mermas controladas
-- Venta por peso/unidad
-- Stock de insumos (harina, levadura)
-
-### 🏬 Tienda Retail
-- Productos simples
-- Control de stock básico
-- Venta directa
-- Reportes de rotación
-
-### 🍱 Dark Kitchen
-- Solo delivery
-- Preparación por recetas
-- Control de tiempos
-- Costeo preciso
+### POS (Móvil)
+- Productos en grid de 2 columnas
+- Botón flotante verde para abrir carrito
+- Carrito como bottom sheet deslizable
+- Confirmación de venta en modal
 
 ---
 
-## 🔧 Personalización
+## 🔧 Comandos Útiles
 
-### Ajustar Umbral de Precios Dinámicos
-```python
-# config/settings.py
-PRECIO_DINAMICO_UMBRAL = 10  # unidades/24h
-PRECIO_DINAMICO_INCREMENTO = 0.15  # 15%
-```
-
-### Modificar Roles y Permisos
-```python
-# usuarios/groups.py
-from django.contrib.auth.models import Group, Permission
-
-cajeros = Group.objects.create(name='Cajero')
-permisos = Permission.objects.filter(
-    codename__in=['add_orden', 'change_venta', 'view_producto']
-)
-cajeros.permissions.set(permisos)
-```
-
-### Agregar Nuevos Motivos de Movimiento
-```python
-# inventario/models.py
-class MovimientoStock(models.Model):
-    MOTIVOS = (
-        ('compra', 'Compra a proveedor'),
-        ('venta', 'Venta'),
-        ('ajuste', 'Ajuste de inventario'),
-        ('merma', 'Merma/Pérdida'),
-        ('devolucion', 'Devolución'),
-        # Añadir nuevos aquí
-    )
-```
+| Comando | Descripción |
+|---------|-------------|
+| `python manage.py runserver` | Servidor de desarrollo |
+| `python manage.py migrate` | Aplicar migraciones |
+| `python manage.py makemigrations` | Crear migraciones |
+| `python manage.py createsuperuser` | Crear admin |
+| `python manage.py populate_categories` | Poblar datos ejemplo |
+| `python manage.py setup_groups` | Crear roles |
+| `python manage.py test` | Ejecutar tests |
 
 ---
 
-## 📈 Roadmap Futuro
+## 📈 Roadmap
 
-### Q3 2026 (Fase 2)
-- ✅ Dashboard avanzado
-- 🔄 API REST con DRF
-- 🔄 Multi-sucursal
-- 🔄 Integración facturación electrónica
-
-### Q4 2026 (Fase 3)
-- 🔄 App móvil (Flutter)
-- 🔄 E-commerce frontend
-- 🔄 Webhooks (WooCommerce, Shopify)
-- 🔄 Inteligencia artificial para demanda
+- [ ] API REST con Django REST Framework
+- [ ] Impresión de tickets/reportes
+- [ ] Exportar reportes a PDF/Excel
+- [ ] Multi-sucursal
+- [ ] Dashboard en tiempo real con WebSockets
+- [ ] App móvil (React Native / Flutter)
 
 ---
 
-## 🤝 Contribución
+## 🤝 Contribuir
 
-1. Fork el proyecto
-2. Crea rama (`git checkout -b feature/nueva-funcionalidad`)
-3. Commit cambios (`git commit -m 'Añade: descripción'`)
-4. Push a rama (`git push origin feature/nueva-funcionalidad`)
-5. Abre Pull Request
+1. Haz fork del repositorio
+2. Crea una rama feature: `git checkout -b feature/nombre`
+3. Commit: `git commit -m 'feat: descripción'`
+4. Push: `git push origin feature/nombre`
+5. Abre un Pull Request
 
 ---
 
 ## 📄 Licencia
 
-Desarrollado para Pyme de Inventario y Ventas.
-
-Distribuido bajo licencia propietaria.
+Propietaria. Todos los derechos reservados.
 
 ---
 
-## 📞 Soporte
+<div align="center">
 
-Para soporte y documentación detallada, ver:
-- [DOCS/FLUJOS_ROLES.md](DOCS/FLUJOS_ROLES.md) - Guías por rol
-- [DOCS/ARQUITECTURA.md](DOCS/ARQUITECTURA.md) - Detalles técnicos
+**Inventory Sales v4.0** — Construido con Django y TailwindCSS
 
----
+Hecho con ❤️ para negocios que necesitan control real
 
-## ⭐ Agradecimientos
-
-- Django Community
-- Bootstrap Team
-- PostgreSQL
-
----
-
-**© 2026 Inventory Sales System v3.0 | Construido para escalar**
+</div>
