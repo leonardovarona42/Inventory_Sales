@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +26,7 @@ SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','void-delta-tidal.ngrok-free.dev']
 
 
 # Application definition
@@ -39,9 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     # Custom apps
     'productos',
-    'recetas',
     'inventario',
-    'ordenes',
     'ventas',
     'reportes',
     'usuarios',
@@ -94,6 +93,7 @@ DATABASES = {
 # Authentication settings
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -114,12 +114,19 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
+    'http://*.ngrok-free.app', 
+    'http://*.ngrok-free.dev',
+]
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Caracas'
 
 USE_I18N = True
 
@@ -139,8 +146,9 @@ MEDIA_ROOT = BASE_DIR / 'media'
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Internationalization
-LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Caracas'
-USE_I18N = True
-USE_TZ = True
+# Roles del sistema
+ROLES = {
+    'Superadmin': 'Dueño del negocio - acceso total + reportes',
+    'Administrador': 'Gestion de inventario, productos y usuarios',
+    'Cajero': 'Punto de venta y registro de ventas',
+}

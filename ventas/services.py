@@ -8,141 +8,99 @@ from inventario.models import MovimientoStock
 
 
 @transaction.atomic
-def procesar_venta(*, orden, metodo_pago, items):
+def procesar_venta(*, metodo_pago, items, cajero=""):
     """
-    Registra una venta completa dentro de una transacción atómica.
-    Incluye: creación de venta, detalle, descuento de stock y movimientos.
+    Registra una venta completa dentro de una transaccion atomica.
 
-    items: lista de dicts con llaves `producto_final` y `cantidad`.
+    items: lista de dicts con llaves `producto` y `cantidad`.
     
     Retorna: instancia de Venta
     
     Lanza: ValidationError si stock insuficiente
     """
-    # PASO 1: Validar stock disponible para TODOS los items
     errores_stock = []
     
     for item in items:
-        producto_final = item["producto_final"]
+        producto = item["producto"]
         cantidad = item["cantidad"]
-        
-        if not hasattr(producto_final, 'receta'):
+        if producto.stock_actual < cantidad:
             errores_stock.append(
-                f"{producto_final.nombre}: No tiene receta asociada"
+                f"{producto.nombre}: necesario {cantidad}, disponible {producto.stock_actual}"
             )
-            continue
-        
-        receta = producto_final.receta
-        for detalle_receta in receta.detalles.all():
-            cantidad_necesaria = detalle_receta.cantidad_necesaria * cantidad
-            stock_disponible = detalle_receta.producto.stock_actual
-            
-            if stock_disponible < cantidad_necesaria:
-                errores_stock.append(
-                    f"{detalle_receta.producto.nombre}: "
-                    f"necesario {cantidad_necesaria} {detalle_receta.producto.unidad_medida}, "
-                    f"disponible {stock_disponible}"
-                )
     
     if errores_stock:
         raise ValidationError(errores_stock)
     
-    # PASO 2: Crear venta
-    venta = Venta.objects.create(
-        orden=orden,
-        metodo_pago=metodo_pago,
-        total_pagado=Decimal("0"),
-    )
+    venta = Venta.objects.create(metodo_pago=metodo_pago, total_pagado=Decimal("0"), cajero=cajero, cajero_user=None)
+    if cajero:
+        try:
+            from django.contrib.auth.models import User
+            venta.cajero_user = User.objects.filter(username=cajero).first()
+            venta.save(update_fields=["cajero_user"])
+        except Exception:
+            pass
     
-    # PASO 3: Crear detalles de venta
     detalles_creados = []
+    total_venta = Decimal("0")
     for item in items:
+        producto = item["producto"]
+        precio = producto.precio_actual or producto.precio_base or Decimal("0")
         detalle = DetalleVenta.objects.create(
             venta=venta,
-            id_producto_final=item["producto_final"],
+            id_producto=producto,
             cantidad=item["cantidad"],
-            precio_unitario=item["producto_final"].precio_actual,
+            precio_unitario=precio,
         )
         detalles_creados.append(detalle)
+        total_venta += detalle.cantidad * detalle.precio_unitario
+        
+        # Descontar stock directo del producto
+        producto.stock_actual -= item["cantidad"]
+        producto.save(update_fields=["stock_actual", "updated_at"])
+        
+        # Registrar movimiento
+        MovimientoStock.objects.create(
+            producto=producto,
+            tipo='salida',
+            cantidad=item["cantidad"],
+            motivo='venta',
+            referencia_id=venta.id,
+            notas=f"Venta #{venta.codigo_ticket}: {producto.nombre} x{item['cantidad']}"
+        )
     
-    # PASO 4: Descontar stock y registrar movimientos
-    for detalle in detalles_creados:
-        _descontar_stock_y_registrar(detalle)
-    
-    # PASO 5: Actualizar total y guardar
-    venta.total_pagado = venta.calcular_total()
-    venta.save(update_fields=["total_pagado", "updated_at"])
-    
-    # PASO 6: Actualizar estado de orden si existe
-    if orden and orden.estado == 'pendiente':
-        orden.cambiar_estado('preparando')
+    venta.total_pagado = total_venta
+    venta.save(update_fields=["total_pagado"])
     
     return venta
 
 
-def _descontar_stock_y_registrar(detalle_venta):
-    """
-    Descuenta stock de insumos y registra movimientos.
-    Se asume que ya se validó el stock previamente.
-    """
-    receta = detalle_venta.id_producto_final.receta
-    
-    for detalle_receta in receta.detalles.all():
-        cantidad_a_descontar = detalle_receta.cantidad_necesaria * detalle_venta.cantidad
-        producto = detalle_receta.producto
-        
-        # Actualizar stock
-        producto.stock_actual -= cantidad_a_descontar
-        producto.save(update_fields=["stock_actual", "updated_at"])
-        
-        # Registrar movimiento de salida
-        MovimientoStock.objects.create(
-            producto=producto,
-            tipo='salida',
-            cantidad=cantidad_a_descontar,
-            motivo='venta',
-            referencia_id=detalle_venta.venta.id,
-            notas=f"Venta #{detalle_venta.venta.id}: "
-                  f"{detalle_venta.id_producto_final.nombre} "
-                  f"x{detalle_venta.cantidad}"
-        )
-
-
 @transaction.atomic
-def cancelar_venta(venta, motivo):
+def cancelar_venta(venta_id, motivo=""):
     """
     Cancela una venta y revierte el stock.
-    
-    Lanza: ValidationError si no se puede cancelar
     """
+    try:
+        venta = Venta.objects.get(id=venta_id)
+    except Venta.DoesNotExist:
+        raise ValidationError("Venta no encontrada")
+    
     if venta.detalles.count() == 0:
         raise ValidationError("Venta sin detalles")
     
-    # Revertir movimientos de stock
     for detalle in venta.detalles.all():
-        receta = detalle.id_producto_final.receta
-        for detalle_receta in receta.detalles.all():
-            cantidad_revertir = detalle_receta.cantidad_necesaria * detalle.cantidad
-            producto = detalle_receta.producto
-            
-            # Revertir stock
-            producto.stock_actual += cantidad_revertir
-            producto.save(update_fields=["stock_actual", "updated_at"])
-            
-            # Registrar movimiento de reversión
-            MovimientoStock.objects.create(
-                producto=producto,
-                tipo='entrada',
-                cantidad=cantidad_revertir,
-                motivo='ajuste',
-                referencia_id=venta.id,
-                notas=f"Cancelación Venta #{venta.id}: "
-                      f"reversión de {detalle.id_producto_final.nombre}"
-            )
+        producto = detalle.id_producto
+        # Revertir stock
+        producto.stock_actual += detalle.cantidad
+        producto.save(update_fields=["stock_actual", "updated_at"])
+        
+        MovimientoStock.objects.create(
+            producto=producto,
+            tipo='entrada',
+            cantidad=detalle.cantidad,
+            motivo='devolucion',
+            referencia_id=venta.id,
+            notas=f"Cancelacion Venta #{venta.codigo_ticket}: {producto.nombre}"
+        )
     
-    # Marcar venta como cancelada (soft delete)
-    venta.delete()  # Soft delete si está configurado
-    
-    # Actualizar orden asociada
-    if venta.orden:
-        venta.orden.cambiar_estado('cancelado')
+    venta.detalles.all().delete()
+    venta.delete()
