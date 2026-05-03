@@ -1,15 +1,48 @@
 from django.db import models
+from django.core.exceptions import ValidationError
 
 
-class Proveedor(models.Model):
-    """Proveedor de insumos"""
-    nombre = models.CharField(max_length=100)
-    contacto = models.CharField(max_length=150, help_text="Teléfono o email")
+class Categoria(models.Model):
+    """Categoria de productos (Aseo, Alimentos, Utiles, Herramientas) con soporte jerarquico"""
+    nombre = models.CharField(max_length=100, unique=True)
+    descripcion = models.TextField(blank=True)
+    icono = models.CharField(max_length=50, blank=True, help_text="Clase Font Awesome, ej: fa-soap")
+    color = models.CharField(max_length=7, default='#6c757d')
+    orden = models.IntegerField(default=0)
+    activa = models.BooleanField(default=True)
+    padre = models.ForeignKey(
+        'self',
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+        related_name='subcategorias',
+        verbose_name='Categoria padre'
+    )
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'productos'
+        ordering = ['orden', 'nombre']
+        verbose_name = 'Categoria'
+        verbose_name_plural = 'Categorias'
+
+    def __str__(self):
+        if self.padre:
+            return f"{self.padre.nombre} > {self.nombre}"
+        return self.nombre
+
+    def get_hijos(self):
+        return self.subcategorias.filter(activa=True)
+
+
+class Proveedor(models.Model):
+    """Proveedor de productos"""
+    nombre = models.CharField(max_length=100)
+    contacto = models.CharField(max_length=150, help_text="Telefono o email")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
         ordering = ['nombre']
 
     def __str__(self):
@@ -17,33 +50,43 @@ class Proveedor(models.Model):
 
 
 class Producto(models.Model):
-    """Insumo (materia prima)"""
+    """Producto del inventario"""
     UNIDADES_MEDIDA = (
+        ('unidad', 'Unidad'),
         ('kg', 'Kilogramos'),
         ('g', 'Gramos'),
-        ('litro', 'Litro'),
-        ('ml', 'Mililitro'),
-        ('unidad', 'Unidad'),
+        ('litro', 'Litros'),
+        ('ml', 'Mililitros'),
         ('paquete', 'Paquete'),
+        ('caja', 'Caja'),
     )
 
-    nombre = models.CharField(max_length=100)
-    unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA)
-    stock_actual = models.DecimalField(max_digits=10, decimal_places=2)
-    stock_minimo = models.DecimalField(max_digits=10, decimal_places=2)
-    precio_costo = models.DecimalField(max_digits=8, decimal_places=2)
+    nombre = models.CharField(max_length=150)
+    descripcion = models.TextField(blank=True)
+    unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default='unidad')
+    stock_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    stock_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=5)
+    precio_costo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    precio_venta = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     imagen = models.ImageField(upload_to='productos/', blank=True, null=True)
-    proveedor = models.ForeignKey(Proveedor, on_delete=models.PROTECT, related_name='productos')
+    proveedor = models.ForeignKey(Proveedor, on_delete=models.SET_NULL, null=True, blank=True, related_name='productos')
+    categorias = models.ManyToManyField(Categoria, blank=True, related_name='productos')
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'productos'
         ordering = ['nombre']
 
     def __str__(self):
-        return f"{self.nombre} ({self.unidad_medida})"
+        return f"{self.nombre} ({self.stock_actual} {self.unidad_medida})"
 
     def necesita_reorden(self):
-        """Verifica si el producto está por debajo del stock mínimo"""
         return self.stock_actual < self.stock_minimo
+
+    @property
+    def precio_actual(self):
+        return self.precio_venta
+
+    @property
+    def precio_base(self):
+        return self.precio_venta

@@ -1,86 +1,76 @@
 {% extends "base.html" %}
 
-{% block title %}Iniciar Sesión{% endblock %}
+{% block title %}Iniciar Sesion{% endblock %}
 
-{% block content %}
-<div class="row justify-content-center" style="min-height: 60vh; align-items: center;">
-    <div class="col-md-4 col-lg-3">
-        <div class="card shadow-sm border-0 rounded-4">
-            <div class="card-body p-4">
-                <div class="text-center mb-4">
-                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#0d6efd" viewBox="0 0 16 16">
-                            <path d="M11 5a3 3 0 1 1-6 0 3 3 0 0 1 6 0zm-9 8c0 1 1 1 1 1h5.256A4.493 4.493 0 0 1 8 12.5a4.49 4.49 0 0 1 1.544-3.393C9.077 9.038 8.564 9 8 9c-5 0-6 3-6 4z"/>
-                        </svg>
-                    </div>
-                    <h3 class="card-title fw-bold text-dark mb-1">Iniciar Sesión</h3>
-                    <p class="text-muted small mb-0">Ingrese sus credenciales para continuar</p>
-                </div>
-                <form method="post" novalidate>
-                    {% csrf_token %}
-                    {% if next %}
-                        <input type="hidden" name="next" value="{{ next }}">
-                    {% endif %}
-                    <div class="mb-3">
-                        <label for="{{ form.username.id_for_label }}" class="form-label fw-semibold">Usuario</label>
-                        {{ form.username }}
-                        {% if form.username.errors %}
-                            <div class="text-danger small mt-1">{{ form.username.errors|first }}</div>
-                        {% endif %}
-                    </div>
-                    <div class="mb-4">
-                        <label for="{{ form.password.id_for_label }}" class="form-label fw-semibold">Contraseña</label>
-                        {{ form.password }}
-                        {% if form.password.errors %}
-                            <div class="text-danger small mt-1">{{ form.password.errors|first }}</div>
-                        {% endif %}
-                    </div>
-                    {% if form.non_field_errors %}
-                        <div class="alert alert-danger py-2 mb-4">
-                            {{ form.non_field_errors|first }}
-                        </div>
-                    {% endif %}
-                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-3 fw-semibold shadow-sm">
-                        Iniciar Sesión
-                    </button>
-                </form>
+{% block layout %}
+<div class="flex items-center justify-center min-h-screen bg-gradient-to-br from-gray-100 to-gray-200">
+    <div class="w-full max-w-md px-6">
+        <!-- Logo -->
+        <div class="text-center mb-8">
+            <div class="w-16 h-16 bg-primary-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary-600/30">
+                <i class="fas fa-store text-white text-2xl"></i>
             </div>
-            <div class="card-footer bg-transparent border-0 text-center py-3">
-                <p class="text-muted small mb-0">¿No tienes cuenta? <a href="#" class="text-decoration-none">Contacta al administrador</a></p>
-            </div>
+            <h1 class="text-2xl font-bold text-gray-900">Mi Negocio</h1>
+            <p class="text-gray-500 mt-1">Sistema de Gestion de Ventas e Inventario</p>
         </div>
+
+        <!-- Login Card -->
+        <div class="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
+            <h2 class="text-xl font-semibold text-gray-900 mb-6">Iniciar Sesion</h2>
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+                
+                <div class="space-y-4">
+                    <div>
+                        <label for="{{ form.username.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Usuario</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-user text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="text" name="username" id="{{ form.username.id_for_label }}" 
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                placeholder="Tu usuario" required autofocus>
+                        </div>
+                        {% if form.username.errors %}
+                            <p class="mt-1.5 text-sm text-red-600">{{ form.username.errors|first }}</p>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-700 mb-1.5">Contraseña</label>
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <i class="fas fa-lock text-gray-400 text-sm"></i>
+                            </div>
+                            <input type="password" name="password" id="{{ form.password.id_for_label }}" 
+                                class="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors"
+                                placeholder="Tu contraseña" required>
+                        </div>
+                        {% if form.password.errors %}
+                            <p class="mt-1.5 text-sm text-red-600">{{ form.password.errors|first }}</p>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if form.non_field_errors %}
+                    <div class="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
+                        {{ form.non_field_errors|first }}
+                    </div>
+                {% endif %}
+
+                <button type="submit" class="mt-6 w-full py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 focus:ring-4 focus:ring-primary-500/30 transition-all font-medium">
+                    <i class="fas fa-right-to-bracket mr-2"></i>
+                    Ingresar
+                </button>
+            </form>
+        </div>
+
+        <p class="text-center text-sm text-gray-500 mt-6">
+            No tienes cuenta? Contacta al administrador
+        </p>
     </div>
 </div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .form-control {
-        border-radius: 8px;
-        border: 1px solid #dee2e6;
-        padding: 0.6rem 0.75rem;
-        transition: all 0.2s;
-    }
-    .form-control:focus {
-        border-color: #86b7fe;
-        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.15);
-    }
-    .btn-primary {
-        background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%);
-        border: none;
-        transition: all 0.2s;
-    }
-    .btn-primary:hover {
-        background: linear-gradient(135deg, #0b5ed7 0%, #0a58ca 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
-    }
-    .card {
-        border: 1px solid rgba(0,0,0,0.08);
-    }
-    body {
-        background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf1 100%);
-        min-height: 100vh;
-    }
-</style>
 {% endblock %}
