@@ -2,18 +2,17 @@ from django import forms
 from django.contrib.auth.models import User, Group
 from .models import UsuarioPerfil
 
-INPUT = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900'
-PASSWORD = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900'
+INPUT = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+PASSWORD = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
 
 
 class UsuarioForm(forms.ModelForm):
-    GRUPOS = [
-        ('Superadmin', 'Superadmin - Dueno del negocio'),
-        ('Administrador', 'Administrador - Gestion de inventario'),
-        ('Cajero', 'Cajero - Punto de venta'),
-    ]
-
-    grupo = forms.ChoiceField(choices=GRUPOS, required=True, label='Rol')
+    grupo = forms.ModelChoiceField(
+        queryset=Group.objects.all().order_by('name'),
+        required=True,
+        label='Rol',
+        empty_label='Seleccionar rol',
+    )
     password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': PASSWORD}),
         required=False,
@@ -29,14 +28,14 @@ class UsuarioForm(forms.ModelForm):
             'first_name': forms.TextInput(attrs={'class': INPUT}),
             'last_name': forms.TextInput(attrs={'class': INPUT}),
             'email': forms.EmailInput(attrs={'class': INPUT}),
-            'is_active': forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-gray-300 text-primary-600 focus:ring-primary-500'}),
+            'is_active': forms.CheckboxInput(attrs={'class': 'h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-primary-600 focus:ring-primary-500'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         if self.instance.pk:
-            current_groups = self.instance.groups.values_list('name', flat=True)
-            if current_groups:
+            current_groups = self.instance.groups.all()
+            if current_groups.exists():
                 self.fields['grupo'].initial = current_groups.first()
 
     def clean_username(self):
@@ -54,13 +53,8 @@ class UsuarioForm(forms.ModelForm):
             user.save()
         grupo = self.cleaned_data.get('grupo')
         if grupo:
-            try:
-                group = Group.objects.get(name=grupo)
-                user.groups.clear()
-                user.groups.add(group)
-            except Group.DoesNotExist:
-                Group.objects.create(name=grupo)
-                user.groups.add(Group.objects.get(name=grupo))
+            user.groups.clear()
+            user.groups.add(grupo)
         return user
 
 

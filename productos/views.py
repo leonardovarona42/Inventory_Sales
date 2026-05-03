@@ -1,17 +1,13 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q, F
 from .models import Proveedor, Producto, Categoria
 from .forms import ProveedorForm, ProductoForm
 from inventario.models import MovimientoStock
-
-
-class IsAdminUser(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_staff
+from utils import IsAdminUser
 
 
 class ProveedorListView(LoginRequiredMixin, IsAdminUser, ListView):

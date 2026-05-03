@@ -1,12 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.exceptions import ValidationError
-from productos.models import Producto
-from inventario.models import MovimientoStock
+from django.utils import timezone
 
 
 class Venta(models.Model):
-    """TransacciOn de venta"""
+    """Transaccion de venta"""
     METODOS_PAGO = (
         ('efectivo', 'Efectivo'),
         ('tarjeta', 'Tarjeta'),
@@ -24,7 +22,6 @@ class Venta(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        app_label = 'ventas'
         ordering = ['-fecha_venta']
         verbose_name = 'Venta'
         verbose_name_plural = 'Ventas'
@@ -37,25 +34,20 @@ class Venta(models.Model):
         return f"Venta #{self.codigo_ticket} - ${self.total_pagado}"
 
     def save(self, *args, **kwargs):
-        generar_ticket = not self.codigo_ticket
         if not self.total_pagado:
             self.total_pagado = 0
         super().save(*args, **kwargs)
-        if generar_ticket:
-            self.codigo_ticket = f"V-{self.fecha_venta.strftime('%Y%m%d')}-{self.pk:06d}"
-            super().save(update_fields=["codigo_ticket"])
 
 
 class DetalleVenta(models.Model):
     """Detalle de productos en una venta"""
     venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='detalles')
-    id_producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
+    id_producto = models.ForeignKey('productos.Producto', on_delete=models.PROTECT)
     cantidad = models.PositiveIntegerField()
     precio_unitario = models.DecimalField(max_digits=8, decimal_places=2)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        app_label = 'ventas'
         verbose_name = 'Detalle Venta'
         verbose_name_plural = 'Detalles Venta'
 
@@ -68,5 +60,6 @@ class DetalleVenta(models.Model):
         super().save(*args, **kwargs)
 
     def clean(self):
-        if self.id_producto and self.id_producto.tipo_producto != 'final':
-            raise ValidationError("Solo se pueden vender productos de tipo 'final'")
+        if self.cantidad is not None and self.cantidad <= 0:
+            from django.core.exceptions import ValidationError
+            raise ValidationError("La cantidad debe ser mayor a 0")

@@ -5,10 +5,10 @@
 
 {% block content %}
 <div class="max-w-4xl mx-auto">
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div class="px-6 py-4 bg-gray-50 border-b flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-gray-100 rounded-xl flex items-center justify-center">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
                     {% if producto.imagen %}
                         <img src="{{ producto.imagen.url }}" class="w-full h-full object-cover rounded-xl">
                     {% else %}

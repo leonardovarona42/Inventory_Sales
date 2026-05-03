@@ -23,5 +23,4 @@ class DetalleVentaForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Only show final products
-        self.fields['id_producto'].queryset = Producto.objects.filter(tipo_producto='final')
+        self.fields['id_producto'].queryset = Producto.objects.filter(stock_actual__gt=0).order_by('nombre')

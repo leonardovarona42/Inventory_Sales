@@ -7,115 +7,115 @@
 <div class="max-w-6xl mx-auto">
     {% if user.is_authenticated %}
     <div class="mb-8">
-        <h1 class="text-2xl font-bold text-gray-900">Bienvenido, {{ user.first_name|default:user.username }}</h1>
-        <p class="text-gray-500 mt-1">Que necesitas hacer hoy?</p>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Bienvenido, {{ user.first_name|default:user.username }}</h1>
+        <p class="text-gray-500 dark:text-gray-400 mt-1">Que necesitas hacer hoy?</p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-        <a href="{% url 'pos' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-green-300 transition-all">
+        <a href="{% url 'pos' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-green-300 dark:hover:border-green-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-cash-register text-green-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-cash-register text-green-600 dark:text-green-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Punto de Venta</h3>
-                    <p class="text-sm text-gray-500 mt-1">Registrar una nueva venta</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Punto de Venta</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Registrar una nueva venta</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-green-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-green-500 transition-colors"></i>
             </div>
         </a>
 
-        <a href="{% url 'venta_list' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-blue-300 transition-all">
+        <a href="{% url 'venta_list' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-blue-300 dark:hover:border-blue-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-receipt text-blue-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-receipt text-blue-600 dark:text-blue-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Historial de Ventas</h3>
-                    <p class="text-sm text-gray-500 mt-1">Ver ventas registradas</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Historial de Ventas</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Ver ventas registradas</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-blue-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-blue-500 transition-colors"></i>
             </div>
         </a>
 
         {% if user.is_staff or user.groups.all %}
-        <a href="{% url 'producto_list' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-purple-300 transition-all">
+        <a href="{% url 'producto_list' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-purple-300 dark:hover:border-purple-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-boxes-stacked text-purple-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-boxes-stacked text-purple-600 dark:text-purple-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Inventario</h3>
-                    <p class="text-sm text-gray-500 mt-1">Gestionar productos</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Inventario</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestionar productos</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-purple-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-purple-500 transition-colors"></i>
             </div>
         </a>
 
-        <a href="{% url 'low_stock' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-red-300 transition-all">
+        <a href="{% url 'low_stock' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-red-300 dark:hover:border-red-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-triangle-exclamation text-red-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-triangle-exclamation text-red-600 dark:text-red-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Stock Bajo</h3>
-                    <p class="text-sm text-gray-500 mt-1">Alertas de inventario</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Stock Bajo</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Alertas de inventario</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-red-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-red-500 transition-colors"></i>
             </div>
         </a>
         {% endif %}
 
         {% if user.is_staff or user.groups.first.name == 'Superadmin' %}
-        <a href="{% url 'dashboard' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-indigo-300 transition-all">
+        <a href="{% url 'dashboard' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-indigo-300 dark:hover:border-indigo-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-chart-line text-indigo-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-chart-line text-indigo-600 dark:text-indigo-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Dashboard</h3>
-                    <p class="text-sm text-gray-500 mt-1">Reportes y estadisticas</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Dashboard</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Reportes y estadisticas</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-indigo-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-indigo-500 transition-colors"></i>
             </div>
         </a>
         {% endif %}
 
         {% if user.groups.first.name == 'Superadmin' or user.is_superuser %}
-        <a href="{% url 'usuario_list' %}" class="group bg-white rounded-xl border border-gray-200 p-6 hover:shadow-lg hover:border-teal-300 transition-all">
+        <a href="{% url 'usuario_list' %}" class="group bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-lg hover:border-teal-300 dark:hover:border-teal-600 transition-all">
             <div class="flex items-start justify-between">
                 <div>
-                    <div class="w-12 h-12 bg-teal-100 rounded-lg flex items-center justify-center mb-4">
-                        <i class="fas fa-users-gear text-teal-600 text-xl"></i>
+                    <div class="w-12 h-12 bg-teal-100 dark:bg-teal-900/30 rounded-lg flex items-center justify-center mb-4">
+                        <i class="fas fa-users-gear text-teal-600 dark:text-teal-400 text-xl"></i>
                     </div>
-                    <h3 class="text-lg font-semibold text-gray-900">Usuarios</h3>
-                    <p class="text-sm text-gray-500 mt-1">Gestionar equipo</p>
+                    <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Usuarios</h3>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Gestionar equipo</p>
                 </div>
-                <i class="fas fa-arrow-right text-gray-300 group-hover:text-teal-500 transition-colors"></i>
+                <i class="fas fa-arrow-right text-gray-300 dark:text-gray-600 group-hover:text-teal-500 transition-colors"></i>
             </div>
         </a>
         {% endif %}
     </div>
 
     {% if user.is_authenticated and ventas_hoy is not None %}
-    <div class="bg-white rounded-xl border border-gray-200 p-6">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Resumen de Hoy</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Resumen de Hoy</h3>
         <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="text-center p-4 bg-green-50 rounded-lg">
-                <p class="text-2xl font-bold text-green-600">{{ ventas_hoy }}</p>
-                <p class="text-sm text-green-700">Ventas</p>
+            <div class="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ ventas_hoy }}</p>
+                <p class="text-sm text-green-700 dark:text-green-400">Ventas</p>
             </div>
-            <div class="text-center p-4 bg-blue-50 rounded-lg">
-                <p class="text-2xl font-bold text-blue-600">${{ total_hoy|floatformat:2 }}</p>
-                <p class="text-sm text-blue-700">Ingresos</p>
+            <div class="text-center p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">${{ total_hoy|floatformat:2 }}</p>
+                <p class="text-sm text-blue-700 dark:text-blue-400">Ingresos</p>
             </div>
-            <div class="text-center p-4 bg-purple-50 rounded-lg">
-                <p class="text-2xl font-bold text-purple-600">{{ productos_activos }}</p>
-                <p class="text-sm text-purple-700">Productos</p>
+            <div class="text-center p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400">{{ productos_activos }}</p>
+                <p class="text-sm text-purple-700 dark:text-purple-400">Productos</p>
             </div>
-            <div class="text-center p-4 bg-red-50 rounded-lg">
-                <p class="text-2xl font-bold text-red-600">{{ stock_bajo }}</p>
-                <p class="text-sm text-red-700">Stock Bajo</p>
+            <div class="text-center p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                <p class="text-2xl font-bold text-red-600 dark:text-red-400">{{ stock_bajo }}</p>
+                <p class="text-sm text-red-700 dark:text-red-400">Stock Bajo</p>
             </div>
         </div>
     </div>
@@ -124,11 +124,11 @@
     {% else %}
     <div class="flex items-center justify-center min-h-[60vh]">
         <div class="text-center">
-            <div class="w-16 h-16 bg-primary-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-lock text-primary-600 text-2xl"></i>
+            <div class="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-lock text-primary-600 dark:text-primary-400 text-2xl"></i>
             </div>
-            <h2 class="text-xl font-semibold text-gray-900 mb-2">Acceso Requerido</h2>
-            <p class="text-gray-500 mb-6">Inicia sesion para acceder al sistema</p>
+            <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Acceso Requerido</h2>
+            <p class="text-gray-500 dark:text-gray-400 mb-6">Inicia sesion para acceder al sistema</p>
             <a href="{% url 'login' %}" class="inline-flex items-center gap-2 px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors">
                 <i class="fas fa-right-to-bracket"></i> Iniciar Sesion
             </a>
