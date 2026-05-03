@@ -142,6 +142,6 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Roles del sistema
 ROLES = {
     'Superadmin': 'Dueño del negocio - acceso total + reportes',
-    'Administrador': 'Gestión de inventario, recetas y usuarios',
+    'Administrador': 'Gestion de inventario, productos y usuarios',
     'Cajero': 'Punto de venta y registro de ventas',
 }

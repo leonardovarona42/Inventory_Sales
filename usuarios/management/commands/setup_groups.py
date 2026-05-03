@@ -21,7 +21,7 @@ class Command(BaseCommand):
         # Crear grupo Administrador
         admin_group, created = Group.objects.get_or_create(name='Administrador')
         if created:
-            # Permisos para gestionar productos, recetas, inventario
+            # Permisos para gestionar productos e inventario
             perms = [
                 ('add_producto', Producto),
                 ('change_producto', Producto),
