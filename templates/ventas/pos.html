@@ -4,42 +4,48 @@
 {% block page_title %}Punto de Venta{% endblock %}
 
 {% block content %}
-<div class="h-[calc(100vh-8rem)] flex gap-6">
+<div class="flex gap-4 lg:gap-6" style="height: calc(100vh - 7rem);">
     <!-- Products Grid -->
-    <div class="flex-1 flex flex-col overflow-hidden">
-        <div class="flex items-center gap-3 mb-4">
-            <div class="flex-1 relative">
+    <div class="flex-1 flex flex-col overflow-hidden min-w-0">
+        <!-- Search Bar - full width -->
+        <div class="mb-3">
+            <div class="relative">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <input type="text" id="searchProducts" placeholder="Buscar producto..." 
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
-            </div>
-            <div id="categoryFilters" class="flex gap-2">
-                {% for cat in categorias %}
-                <button onclick="filterCategory('{{ cat }}')" class="category-filter px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 transition-colors" data-category="{{ cat }}">
-                    {{ cat }}
-                </button>
-                {% endfor %}
-                <button onclick="filterCategory('')" class="category-filter active px-3 py-1.5 border-2 border-primary-500 bg-primary-50 text-primary-700 rounded-lg text-sm font-medium" data-category="">
-                    Todos
-                </button>
+                <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm sm:text-base">
             </div>
         </div>
 
+        <!-- Categories - horizontal scroll -->
+        <div class="mb-4">
+            <div id="categoryFilters" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
+                <button onclick="filterCategory('')" class="category-filter active flex-shrink-0 px-3 py-2 sm:px-4 border-2 border-primary-500 bg-primary-50 text-primary-700 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap" data-category="">
+                    <i class="fas fa-th mr-1"></i> Todos
+                </button>
+                {% for cat in categorias %}
+                <button onclick="filterCategory('{{ cat }}')" class="category-filter flex-shrink-0 px-3 py-2 sm:px-4 border border-gray-300 rounded-lg text-xs sm:text-sm hover:bg-gray-50 transition-colors whitespace-nowrap" data-category="{{ cat }}">
+                    {{ cat }}
+                </button>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Products -->
         <div class="flex-1 overflow-y-auto">
-            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4" id="productsGrid">
+            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4" id="productsGrid">
                 {% for producto in productos %}
-                <button onclick="agregarAlCarrito({{ producto.id }})" 
-                    class="group bg-white border border-gray-200 rounded-xl p-4 hover:border-green-400 hover:shadow-md transition-all text-left product-card"
+                <button onclick="agregarAlCarrito({{ producto.id }})"
+                    class="group bg-white border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-4 hover:border-green-400 hover:shadow-md transition-all text-left product-card"
                     data-name="{{ producto.nombre|lower }}"
                     data-categories="{% for c in producto.categorias.all %}{{ c.nombre }} {% if c.padre %}{{ c.padre.nombre }}{% endif %}{% endfor %}">
-                    <div class="aspect-square bg-gray-100 rounded-lg mb-3 flex items-center justify-center overflow-hidden">
+                    <div class="aspect-square bg-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
                         {% if producto.imagen %}
                             <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover">
                         {% else %}
-                            <i class="fas fa-box text-gray-300 text-3xl"></i>
+                            <i class="fas fa-box text-gray-300 text-2xl sm:text-3xl"></i>
                         {% endif %}
                     </div>
-                    <h3 class="font-medium text-gray-900 text-sm truncate">{{ producto.nombre }}</h3>
+                    <h3 class="font-medium text-gray-900 text-xs sm:text-sm truncate">{{ producto.nombre }}</h3>
                     <div class="flex gap-1 mt-1 flex-wrap">
                         {% for cat in producto.categorias.all %}
                             {% if not cat.padre %}
@@ -47,8 +53,8 @@
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <p class="text-lg font-bold text-green-600 mt-2">${{ producto.precio_venta|floatformat:2 }}</p>
-                    <p class="text-xs text-gray-400">Stock: {{ producto.stock_actual }}</p>
+                    <p class="text-base sm:text-lg font-bold text-green-600 mt-1 sm:mt-2">${{ producto.precio_venta|floatformat:2 }}</p>
+                    <p class="text-[10px] sm:text-xs text-gray-400">Stock: {{ producto.stock_actual }}</p>
                 </button>
                 {% empty %}
                 <div class="col-span-full text-center py-12">
@@ -60,8 +66,8 @@
         </div>
     </div>
 
-    <!-- Cart Sidebar -->
-    <div class="w-96 bg-white rounded-xl border border-gray-200 flex flex-col shadow-sm">
+    <!-- Cart Sidebar - hidden on mobile, shown via modal -->
+    <div id="cartSidebar" class="hidden lg:flex lg:w-96 bg-white rounded-xl border border-gray-200 flex-col shadow-sm">
         <div class="px-5 py-4 border-b border-gray-100">
             <div class="flex items-center justify-between">
                 <h3 class="font-semibold text-gray-900"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
@@ -113,8 +119,68 @@
     </div>
 </div>
 
+<!-- Mobile Cart Button -->
+<button onclick="toggleMobileCart()" class="lg:hidden fixed bottom-4 right-4 z-40 w-14 h-14 bg-green-600 text-white rounded-full shadow-lg flex items-center justify-center">
+    <i class="fas fa-cart-shopping text-xl"></i>
+    <span id="mobileCartBadge" class="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full text-xs flex items-center justify-center font-bold">0</span>
+</button>
+
+<!-- Mobile Cart Modal -->
+<div id="mobileCartModal" class="lg:hidden fixed inset-0 bg-black/50 z-50 hidden">
+    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col" style="height: 85vh;">
+        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-900"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
+            <button onclick="toggleMobileCart()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
+                <i class="fas fa-times text-gray-500"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4" id="mobileCartItems">
+            <div class="text-center py-8 text-gray-400">
+                <i class="fas fa-cart-arrow-down text-3xl mb-2"></i>
+                <p class="text-sm">Carrito vacio</p>
+            </div>
+        </div>
+
+        <div class="border-t border-gray-100 p-5 space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Metodo de pago</label>
+                <div class="grid grid-cols-2 gap-2">
+                    <button type="button" class="mobile-payment-btn active px-3 py-2 border-2 border-green-500 bg-green-50 text-green-700 rounded-lg text-sm font-medium text-center" data-method="efectivo">
+                        <i class="fas fa-money-bill mr-1"></i> Efectivo
+                    </button>
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="tarjeta">
+                        <i class="fas fa-credit-card mr-1"></i> Tarjeta
+                    </button>
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="transferencia">
+                        <i class="fas fa-building-columns mr-1"></i> Transferencia
+                    </button>
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="otro">
+                        <i class="fas fa-ellipsis mr-1"></i> Otro
+                    </button>
+                </div>
+                <input type="hidden" id="mobileMetodoPago" value="efectivo">
+            </div>
+
+            <div class="flex items-center justify-between">
+                <span class="text-gray-600 font-medium">Total</span>
+                <span id="mobileCartTotal" class="text-2xl font-bold text-gray-900">$0.00</span>
+            </div>
+
+            <div class="flex gap-2">
+                <button onclick="limpiarCarrito()" class="flex-1 py-2.5 border-2 border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                    <i class="fas fa-trash mr-1"></i> Limpiar
+                </button>
+                <button id="mobileBtnConfirmar" onclick="abrirConfirmacion()" class="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i class="fas fa-check mr-1"></i> Cobrar
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Confirmation Modal -->
-<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
         <div class="px-6 py-4 bg-green-600 text-white">
             <h3 class="text-lg font-semibold"><i class="fas fa-check-circle mr-2"></i>Confirmar Venta</h3>
@@ -137,7 +203,7 @@
 </div>
 
 <!-- Success Modal -->
-<div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+<div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] hidden">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden text-center p-8">
         <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <i class="fas fa-check text-green-600 text-2xl"></i>
@@ -158,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let metodoPago = 'efectivo';
     let activeCategory = '';
 
+    // Payment buttons (desktop)
     document.querySelectorAll('.payment-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.payment-btn').forEach(b => {
@@ -168,6 +235,22 @@ document.addEventListener('DOMContentLoaded', function() {
             this.classList.remove('border-gray-200', 'text-gray-600');
             metodoPago = this.dataset.method;
             document.getElementById('metodoPago').value = metodoPago;
+            document.getElementById('mobileMetodoPago').value = metodoPago;
+        });
+    });
+
+    // Payment buttons (mobile)
+    document.querySelectorAll('.mobile-payment-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('.mobile-payment-btn').forEach(b => {
+                b.classList.remove('active', 'border-green-500', 'bg-green-50', 'text-green-700');
+                b.classList.add('border-gray-200', 'text-gray-600');
+            });
+            this.classList.add('active', 'border-green-500', 'bg-green-50', 'text-green-700');
+            this.classList.remove('border-gray-200', 'text-gray-600');
+            metodoPago = this.dataset.method;
+            document.getElementById('metodoPago').value = metodoPago;
+            document.getElementById('mobileMetodoPago').value = metodoPago;
         });
     });
 
@@ -176,6 +259,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     window.filterCategory = function(cat) {
+        if (activeCategory === cat && cat !== '') {
+            activeCategory = '';
+            cat = '';
+        }
         activeCategory = cat;
         document.querySelectorAll('.category-filter').forEach(b => {
             b.classList.remove('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium');
@@ -252,16 +339,15 @@ document.addEventListener('DOMContentLoaded', function() {
         const totalItems = items.reduce((acc, item) => acc + item.cantidad, 0);
         const total = items.reduce((acc, item) => acc + (parseFloat(item.precio) * item.cantidad), 0);
 
+        // Update counters
         document.getElementById('cartCount').textContent = totalItems;
-        document.getElementById('cartTotal').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('mobileCartBadge').textContent = totalItems;
+        document.getElementById('cartTotal').textContent = '$' + total.toFixed(2);
+        document.getElementById('mobileCartTotal').textContent = '$' + total.toFixed(2);
         document.getElementById('btnConfirmar').disabled = items.length === 0;
+        document.getElementById('mobileBtnConfirmar').disabled = items.length === 0;
 
-        const container = document.getElementById('cartItems');
-        if (!items.length) {
-            container.innerHTML = '<div class="text-center py-8 text-gray-400"><i class="fas fa-cart-arrow-down text-3xl mb-2"></i><p class="text-sm">Carrito vacio</p></div>';
-            return;
-        }
-        container.innerHTML = items.map(item => `
+        const html = items.map(item => `
             <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
                 <div class="flex-1 min-w-0">
                     <p class="font-medium text-sm text-gray-900 truncate">${item.nombre}</p>
@@ -273,7 +359,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 </div>
             </div>
         `).join('');
+
+        const emptyHtml = '<div class="text-center py-8 text-gray-400"><i class="fas fa-cart-arrow-down text-3xl mb-2"></i><p class="text-sm">Carrito vacio</p></div>';
+
+        document.getElementById('cartItems').innerHTML = items.length ? html : emptyHtml;
+        document.getElementById('mobileCartItems').innerHTML = items.length ? html : emptyHtml;
     }
+
+    window.toggleMobileCart = function() {
+        document.getElementById('mobileCartModal').classList.toggle('hidden');
+    };
 
     window.abrirConfirmacion = function() {
         const items = Object.values(carrito);
@@ -285,8 +380,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 <span class="font-medium">$${(parseFloat(item.precio) * item.cantidad).toFixed(2)}</span>
             </div>
         `).join('');
-        document.getElementById('confirmTotal').textContent = `$${total.toFixed(2)}`;
+        document.getElementById('confirmTotal').textContent = '$' + total.toFixed(2);
         document.getElementById('confirmModal').classList.remove('hidden');
+        // Close mobile cart if open
+        document.getElementById('mobileCartModal').classList.add('hidden');
     };
 
     window.cerrarConfirmacion = function() { document.getElementById('confirmModal').classList.add('hidden'); };
@@ -304,8 +401,8 @@ document.addEventListener('DOMContentLoaded', function() {
             if (res.success) {
                 carrito = {};
                 renderCarrito();
-                document.getElementById('successTicket').textContent = `Ticket: ${res.ticket}`;
-                document.getElementById('successTotal').textContent = `$${res.total}`;
+                document.getElementById('successTicket').textContent = 'Ticket: ' + res.ticket;
+                document.getElementById('successTotal').textContent = '$' + res.total;
                 document.getElementById('successModal').classList.remove('hidden');
             } else {
                 alert(res.error || 'Error al procesar la venta');

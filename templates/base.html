@@ -31,8 +31,11 @@
 <body class="h-full bg-gray-50">
     {% block layout %}
     <div class="flex h-screen overflow-hidden">
+        <!-- Mobile overlay -->
+        <div id="sidebarOverlay" class="fixed inset-0 bg-black/50 z-30 lg:hidden hidden" onclick="toggleSidebar()"></div>
+
         <!-- Sidebar -->
-        <aside id="sidebar" class="w-64 bg-sidebar flex-shrink-0 flex flex-col transition-all duration-300">
+        <aside id="sidebar" class="w-64 bg-sidebar flex-shrink-0 flex flex-col transition-transform duration-300 fixed inset-y-0 left-0 z-40 lg:static lg:translate-x-0 -translate-x-full">
             <div class="flex items-center gap-3 px-6 py-5 border-b border-gray-700/50">
                 <div class="w-9 h-9 bg-primary-600 rounded-lg flex items-center justify-center">
                     <i class="fas fa-store text-white text-sm"></i>
@@ -109,22 +112,22 @@
         </aside>
 
         <div class="flex-1 flex flex-col overflow-hidden">
-            <header class="bg-white border-b border-gray-200 px-6 py-3 flex items-center justify-between">
+            <header class="bg-white border-b border-gray-200 px-3 sm:px-6 py-3 flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <button id="sidebarToggle" class="lg:hidden text-gray-500 hover:text-gray-700">
                         <i class="fas fa-bars text-lg"></i>
                     </button>
-                    <h2 class="text-lg font-semibold text-gray-800">{% block page_title %}{% endblock %}</h2>
+                    <h2 class="text-base sm:text-lg font-semibold text-gray-800 truncate">{% block page_title %}{% endblock %}</h2>
                 </div>
-                <div class="flex items-center gap-4">
-                    <span class="text-sm text-gray-500">{{ user.first_name|default:user.username }}</span>
-                    <span class="px-2.5 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">
+                <div class="flex items-center gap-2 sm:gap-4">
+                    <span class="text-xs sm:text-sm text-gray-500 hidden sm:inline">{{ user.first_name|default:user.username }}</span>
+                    <span class="px-2 sm:px-2.5 py-0.5 bg-primary-100 text-primary-700 rounded-full text-[10px] sm:text-xs font-medium">
                         {{ user.groups.first.name|default:"Sin rol" }}
                     </span>
                 </div>
             </header>
 
-            <main class="flex-1 overflow-y-auto p-6">
+            <main class="flex-1 overflow-y-auto p-3 sm:p-6">
                 {% block messages %}
                 {% if messages %}
                 <div class="mb-4 space-y-2">
@@ -145,12 +148,15 @@
     {% endblock %}
 
     <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('sidebarOverlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+        }
         const sidebarToggle = document.getElementById('sidebarToggle');
-        const sidebar = document.getElementById('sidebar');
         if (sidebarToggle) {
-            sidebarToggle.addEventListener('click', () => {
-                sidebar.classList.toggle('-translate-x-full');
-            });
+            sidebarToggle.addEventListener('click', toggleSidebar);
         }
     </script>
     {% block extra_js %}{% endblock %}

@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1','void-delta-tidal.ngrok-free.dev']
 
 
 # Application definition
@@ -114,6 +114,13 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
+    'http://*.ngrok-free.app', 
+    'http://*.ngrok-free.dev',
+]
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
