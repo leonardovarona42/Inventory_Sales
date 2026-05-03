@@ -4,17 +4,24 @@ from productos.models import Producto
 
 class MovimientoStock(models.Model):
     """Movimientos de entrada y salida de stock"""
+    ENTRADA = 'entrada'
+    SALIDA = 'salida'
     TIPOS_MOVIMIENTO = (
-        ('entrada', 'Entrada'),
-        ('salida', 'Salida'),
+        (ENTRADA, 'Entrada'),
+        (SALIDA, 'Salida'),
     )
 
+    COMPRA = 'compra'
+    VENTA = 'venta'
+    AJUSTE = 'ajuste'
+    MERMA = 'merma'
+    DEVOLUCION = 'devolucion'
     MOTIVOS = (
-        ('compra', 'Compra a proveedor'),
-        ('venta', 'Venta'),
-        ('ajuste', 'Ajuste de inventario'),
-        ('merma', 'Merma/Pérdida'),
-        ('devolucion', 'Devolución'),
+        (COMPRA, 'Compra a proveedor'),
+        (VENTA, 'Venta'),
+        (AJUSTE, 'Ajuste de inventario'),
+        (MERMA, 'Merma/Pérdida'),
+        (DEVOLUCION, 'Devolución'),
     )
 
     producto = models.ForeignKey(Producto, on_delete=models.PROTECT, related_name='movimientos')
@@ -28,7 +35,6 @@ class MovimientoStock(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        app_label = 'inventario'
         ordering = ['-fecha']
         verbose_name = 'Movimiento Stock'
         verbose_name_plural = 'Movimientos Stock'

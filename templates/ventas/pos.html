@@ -10,20 +10,20 @@
         <!-- Search Bar - full width -->
         <div class="mb-3">
             <div class="relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
                 <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-gray-900 text-sm sm:text-base">
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-gray-900 dark:text-white text-sm sm:text-base">
             </div>
         </div>
 
         <!-- Categories - horizontal scroll -->
         <div class="mb-4">
             <div id="categoryFilters" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
-                <button onclick="filterCategory('')" class="category-filter active flex-shrink-0 px-3 py-2 sm:px-4 border-2 border-primary-500 bg-primary-50 text-primary-700 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap" data-category="">
+                <button onclick="filterCategory('')" class="category-filter active flex-shrink-0 px-3 py-2 sm:px-4 border-2 border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap" data-category="">
                     <i class="fas fa-th mr-1"></i> Todos
                 </button>
                 {% for cat in categorias %}
-                <button onclick="filterCategory('{{ cat }}')" class="category-filter flex-shrink-0 px-3 py-2 sm:px-4 border border-gray-300 rounded-lg text-xs sm:text-sm hover:bg-gray-50 transition-colors whitespace-nowrap" data-category="{{ cat }}">
+                <button onclick="filterCategory('{{ cat }}')" class="category-filter flex-shrink-0 px-3 py-2 sm:px-4 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap" data-category="{{ cat }}">
                     {{ cat }}
                 </button>
                 {% endfor %}
@@ -35,31 +35,31 @@
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2 sm:gap-4" id="productsGrid">
                 {% for producto in productos %}
                 <button onclick="agregarAlCarrito({{ producto.id }})"
-                    class="group bg-white border border-gray-200 rounded-lg sm:rounded-xl p-2 sm:p-4 hover:border-green-400 hover:shadow-md transition-all text-left product-card"
+                    class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl p-2 sm:p-4 hover:border-green-400 dark:hover:border-green-600 hover:shadow-md transition-all text-left product-card"
                     data-name="{{ producto.nombre|lower }}"
                     data-categories="{% for c in producto.categorias.all %}{{ c.nombre }} {% if c.padre %}{{ c.padre.nombre }}{% endif %}{% endfor %}">
-                    <div class="aspect-square bg-gray-100 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
+                    <div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
                         {% if producto.imagen %}
                             <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover">
                         {% else %}
-                            <i class="fas fa-box text-gray-300 text-2xl sm:text-3xl"></i>
+                            <i class="fas fa-box text-gray-300 dark:text-gray-600 text-2xl sm:text-3xl"></i>
                         {% endif %}
                     </div>
-                    <h3 class="font-medium text-gray-900 text-xs sm:text-sm truncate">{{ producto.nombre }}</h3>
+                    <h3 class="font-medium text-gray-900 dark:text-white text-xs sm:text-sm truncate">{{ producto.nombre }}</h3>
                     <div class="flex gap-1 mt-1 flex-wrap">
                         {% for cat in producto.categorias.all %}
                             {% if not cat.padre %}
-                            <span class="text-[10px] px-1.5 py-0.5 bg-gray-100 text-gray-500 rounded">{{ cat.nombre }}</span>
+                             <span class="text-[10px] px-1.5 py-0.5 bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400 rounded">{{ cat.nombre }}</span>
                             {% endif %}
                         {% endfor %}
                     </div>
-                    <p class="text-base sm:text-lg font-bold text-green-600 mt-1 sm:mt-2">${{ producto.precio_venta|floatformat:2 }}</p>
-                    <p class="text-[10px] sm:text-xs text-gray-400">Stock: {{ producto.stock_actual }}</p>
+                    <p class="text-base sm:text-lg font-bold text-green-600 dark:text-green-400 mt-1 sm:mt-2">${{ producto.precio_venta|floatformat:2 }}</p>
+                    <p class="text-[10px] sm:text-xs text-gray-400 dark:text-gray-500">Stock: {{ producto.stock_actual }}</p>
                 </button>
                 {% empty %}
                 <div class="col-span-full text-center py-12">
-                    <i class="fas fa-box-open text-gray-300 text-4xl mb-3"></i>
-                    <p class="text-gray-500">No hay productos disponibles</p>
+                    <i class="fas fa-box-open text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+                    <p class="text-gray-500 dark:text-gray-400">No hay productos disponibles</p>
                 </div>
                 {% endfor %}
             </div>
@@ -67,35 +67,35 @@
     </div>
 
     <!-- Cart Sidebar - hidden on mobile, shown via modal -->
-    <div id="cartSidebar" class="hidden lg:flex lg:w-96 bg-white rounded-xl border border-gray-200 flex-col shadow-sm">
-        <div class="px-5 py-4 border-b border-gray-100">
+    <div id="cartSidebar" class="hidden lg:flex lg:w-96 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 flex-col shadow-sm">
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700">
             <div class="flex items-center justify-between">
-                <h3 class="font-semibold text-gray-900"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
-                <span id="cartCount" class="px-2 py-0.5 bg-primary-100 text-primary-700 rounded-full text-xs font-medium">0</span>
+                <h3 class="font-semibold text-gray-900 dark:text-white"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
+                <span id="cartCount" class="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-full text-xs font-medium">0</span>
             </div>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4" id="cartItems">
-            <div class="text-center py-8 text-gray-400">
+            <div class="text-center py-8 text-gray-400 dark:text-gray-500">
                 <i class="fas fa-cart-arrow-down text-3xl mb-2"></i>
                 <p class="text-sm">Carrito vacio</p>
             </div>
         </div>
 
-        <div class="border-t border-gray-100 p-5 space-y-4">
+        <div class="border-t border-gray-100 dark:border-gray-700 p-5 space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Metodo de pago</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metodo de pago</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" class="payment-btn active px-3 py-2 border-2 border-green-500 bg-green-50 text-green-700 rounded-lg text-sm font-medium text-center" data-method="efectivo">
+                    <button type="button" class="payment-btn active px-3 py-2 border-2 border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium text-center" data-method="efectivo">
                         <i class="fas fa-money-bill mr-1"></i> Efectivo
                     </button>
-                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="tarjeta">
+                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="tarjeta">
                         <i class="fas fa-credit-card mr-1"></i> Tarjeta
                     </button>
-                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="transferencia">
+                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="transferencia">
                         <i class="fas fa-building-columns mr-1"></i> Transferencia
                     </button>
-                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="otro">
+                    <button type="button" class="payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="otro">
                         <i class="fas fa-ellipsis mr-1"></i> Otro
                     </button>
                 </div>
@@ -103,12 +103,12 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <span class="text-gray-600 font-medium">Total</span>
-                <span id="cartTotal" class="text-2xl font-bold text-gray-900">$0.00</span>
+                <span class="text-gray-600 dark:text-gray-300 font-medium">Total</span>
+                <span id="cartTotal" class="text-2xl font-bold text-gray-900 dark:text-white">$0.00</span>
             </div>
 
             <div class="flex gap-2">
-                <button onclick="limpiarCarrito()" class="flex-1 py-2.5 border-2 border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                <button onclick="limpiarCarrito()" class="flex-1 py-2.5 border-2 border-red-200 dark:border-red-800 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
                     <i class="fas fa-trash mr-1"></i> Limpiar
                 </button>
                 <button id="btnConfirmar" onclick="abrirConfirmacion()" class="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
@@ -127,35 +127,35 @@
 
 <!-- Mobile Cart Modal -->
 <div id="mobileCartModal" class="lg:hidden fixed inset-0 bg-black/50 z-50 hidden">
-    <div class="absolute bottom-0 left-0 right-0 bg-white rounded-t-2xl max-h-[85vh] flex flex-col" style="height: 85vh;">
-        <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-            <h3 class="font-semibold text-gray-900"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
-            <button onclick="toggleMobileCart()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100">
-                <i class="fas fa-times text-gray-500"></i>
+    <div class="absolute bottom-0 left-0 right-0 bg-white dark:bg-gray-800 rounded-t-2xl max-h-[85vh] flex flex-col" style="height: 85vh;">
+        <div class="px-5 py-4 border-b border-gray-100 dark:border-gray-700 flex items-center justify-between">
+            <h3 class="font-semibold text-gray-900 dark:text-white"><i class="fas fa-cart-shopping mr-2 text-primary-600"></i>Carrito</h3>
+            <button onclick="toggleMobileCart()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 dark:hover:bg-gray-700">
+                <i class="fas fa-times text-gray-500 dark:text-gray-400"></i>
             </button>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4" id="mobileCartItems">
-            <div class="text-center py-8 text-gray-400">
+            <div class="text-center py-8 text-gray-400 dark:text-gray-500">
                 <i class="fas fa-cart-arrow-down text-3xl mb-2"></i>
                 <p class="text-sm">Carrito vacio</p>
             </div>
         </div>
 
-        <div class="border-t border-gray-100 p-5 space-y-4">
+        <div class="border-t border-gray-100 dark:border-gray-700 p-5 space-y-4">
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-2">Metodo de pago</label>
+                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metodo de pago</label>
                 <div class="grid grid-cols-2 gap-2">
-                    <button type="button" class="mobile-payment-btn active px-3 py-2 border-2 border-green-500 bg-green-50 text-green-700 rounded-lg text-sm font-medium text-center" data-method="efectivo">
+                    <button type="button" class="mobile-payment-btn active px-3 py-2 border-2 border-green-500 bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400 rounded-lg text-sm font-medium text-center" data-method="efectivo">
                         <i class="fas fa-money-bill mr-1"></i> Efectivo
                     </button>
-                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="tarjeta">
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="tarjeta">
                         <i class="fas fa-credit-card mr-1"></i> Tarjeta
                     </button>
-                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="transferencia">
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="transferencia">
                         <i class="fas fa-building-columns mr-1"></i> Transferencia
                     </button>
-                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 text-gray-600 rounded-lg text-sm font-medium text-center hover:border-gray-300" data-method="otro">
+                    <button type="button" class="mobile-payment-btn px-3 py-2 border-2 border-gray-200 dark:border-gray-600 text-gray-600 dark:text-gray-400 rounded-lg text-sm font-medium text-center hover:border-gray-300 dark:hover:border-gray-500" data-method="otro">
                         <i class="fas fa-ellipsis mr-1"></i> Otro
                     </button>
                 </div>
@@ -163,12 +163,12 @@
             </div>
 
             <div class="flex items-center justify-between">
-                <span class="text-gray-600 font-medium">Total</span>
-                <span id="mobileCartTotal" class="text-2xl font-bold text-gray-900">$0.00</span>
+                <span class="text-gray-600 dark:text-gray-300 font-medium">Total</span>
+                <span id="mobileCartTotal" class="text-2xl font-bold text-gray-900 dark:text-white">$0.00</span>
             </div>
 
             <div class="flex gap-2">
-                <button onclick="limpiarCarrito()" class="flex-1 py-2.5 border-2 border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors font-medium">
+                <button onclick="limpiarCarrito()" class="flex-1 py-2.5 border-2 border-red-200 dark:border-red-800 text-red-600 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium">
                     <i class="fas fa-trash mr-1"></i> Limpiar
                 </button>
                 <button id="mobileBtnConfirmar" onclick="abrirConfirmacion()" class="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium disabled:opacity-50 disabled:cursor-not-allowed">
@@ -181,20 +181,20 @@
 
 <!-- Confirmation Modal -->
 <div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
         <div class="px-6 py-4 bg-green-600 text-white">
             <h3 class="text-lg font-semibold"><i class="fas fa-check-circle mr-2"></i>Confirmar Venta</h3>
         </div>
         <div class="p-6">
-            <p class="text-sm text-gray-600 mb-4">Verifica los productos antes de procesar:</p>
+            <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Verifica los productos antes de procesar:</p>
             <div class="space-y-2 max-h-48 overflow-y-auto mb-4" id="confirmItems"></div>
             <div class="border-t pt-4 flex justify-between items-center">
-                <span class="text-gray-600 font-medium">Total a pagar</span>
-                <span id="confirmTotal" class="text-2xl font-bold text-green-600">$0.00</span>
+                <span class="text-gray-600 dark:text-gray-300 font-medium">Total a pagar</span>
+                <span id="confirmTotal" class="text-2xl font-bold text-green-600 dark:text-green-400">$0.00</span>
             </div>
         </div>
-        <div class="px-6 py-4 bg-gray-50 flex gap-3">
-            <button onclick="cerrarConfirmacion()" class="flex-1 py-2.5 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors font-medium">Cancelar</button>
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800 flex gap-3">
+            <button onclick="cerrarConfirmacion()" class="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium">Cancelar</button>
             <button id="btnProcesar" onclick="procesarVenta()" class="flex-1 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                 <i class="fas fa-cash-register mr-1"></i> Confirmar Venta
             </button>
@@ -204,13 +204,13 @@
 
 <!-- Success Modal -->
 <div id="successModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] hidden">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden text-center p-8">
-        <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i class="fas fa-check text-green-600 text-2xl"></i>
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-sm mx-4 overflow-hidden text-center p-8">
+        <div class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-check text-green-600 dark:text-green-400 text-2xl"></i>
         </div>
-        <h3 class="text-xl font-semibold text-gray-900 mb-2">Venta Exitosa!</h3>
-        <p id="successTicket" class="text-sm text-gray-500 mb-1"></p>
-        <p id="successTotal" class="text-2xl font-bold text-green-600 mb-6"></p>
+        <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-2">Venta Exitosa!</h3>
+        <p id="successTicket" class="text-sm text-gray-500 dark:text-gray-400 mb-1"></p>
+        <p id="successTotal" class="text-2xl font-bold text-green-600 dark:text-green-400 mb-6"></p>
         <button onclick="cerrarSuccess()" class="w-full py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium">Nueva Venta</button>
     </div>
 </div>
@@ -228,11 +228,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.payment-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.payment-btn').forEach(b => {
-                b.classList.remove('active', 'border-green-500', 'bg-green-50', 'text-green-700');
-                b.classList.add('border-gray-200', 'text-gray-600');
+                b.classList.remove('active', 'border-green-500', 'bg-green-50', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+                b.classList.add('border-gray-200', 'text-gray-600', 'dark:border-gray-600', 'dark:text-gray-400');
             });
-            this.classList.add('active', 'border-green-500', 'bg-green-50', 'text-green-700');
-            this.classList.remove('border-gray-200', 'text-gray-600');
+            this.classList.add('active', 'border-green-500', 'bg-green-50', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+            this.classList.remove('border-gray-200', 'text-gray-600', 'dark:border-gray-600', 'dark:text-gray-400');
             metodoPago = this.dataset.method;
             document.getElementById('metodoPago').value = metodoPago;
             document.getElementById('mobileMetodoPago').value = metodoPago;
@@ -243,11 +243,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.querySelectorAll('.mobile-payment-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.mobile-payment-btn').forEach(b => {
-                b.classList.remove('active', 'border-green-500', 'bg-green-50', 'text-green-700');
-                b.classList.add('border-gray-200', 'text-gray-600');
+                b.classList.remove('active', 'border-green-500', 'bg-green-50', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+                b.classList.add('border-gray-200', 'text-gray-600', 'dark:border-gray-600', 'dark:text-gray-400');
             });
-            this.classList.add('active', 'border-green-500', 'bg-green-50', 'text-green-700');
-            this.classList.remove('border-gray-200', 'text-gray-600');
+            this.classList.add('active', 'border-green-500', 'bg-green-50', 'text-green-700', 'dark:bg-green-900/30', 'dark:text-green-400');
+            this.classList.remove('border-gray-200', 'text-gray-600', 'dark:border-gray-600', 'dark:text-gray-400');
             metodoPago = this.dataset.method;
             document.getElementById('metodoPago').value = metodoPago;
             document.getElementById('mobileMetodoPago').value = metodoPago;
@@ -265,13 +265,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
         activeCategory = cat;
         document.querySelectorAll('.category-filter').forEach(b => {
-            b.classList.remove('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium');
-            b.classList.add('border', 'border-gray-300');
+            b.classList.remove('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium', 'dark:bg-primary-900/30', 'dark:text-primary-300');
+            b.classList.add('border', 'border-gray-300', 'dark:border-gray-600');
         });
         const btn = document.querySelector(`.category-filter[data-category="${cat}"]`);
         if (btn) {
-            btn.classList.add('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium');
-            btn.classList.remove('border', 'border-gray-300');
+            btn.classList.add('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium', 'dark:bg-primary-900/30', 'dark:text-primary-300');
+            btn.classList.remove('border', 'border-gray-300', 'dark:border-gray-600');
         }
         filterProducts(document.getElementById('searchProducts').value.toLowerCase(), cat);
     };
@@ -348,19 +348,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.getElementById('mobileBtnConfirmar').disabled = items.length === 0;
 
         const html = items.map(item => `
-            <div class="flex items-center gap-3 py-3 border-b border-gray-50 last:border-0">
+            <div class="flex items-center gap-3 py-3 border-b border-gray-50 dark:border-gray-700 last:border-0">
                 <div class="flex-1 min-w-0">
-                    <p class="font-medium text-sm text-gray-900 truncate">${item.nombre}</p>
-                    <p class="text-xs text-gray-500">$${parseFloat(item.precio).toFixed(2)} x ${item.cantidad}</p>
+                    <p class="font-medium text-sm text-gray-900 dark:text-white truncate">${item.nombre}</p>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">$${parseFloat(item.precio).toFixed(2)} x ${item.cantidad}</p>
                 </div>
                 <div class="text-right">
                     <p class="font-semibold text-sm">$${(parseFloat(item.precio) * item.cantidad).toFixed(2)}</p>
-                    <button onclick="quitarDelCarrito(${item.id})" class="text-xs text-red-500 hover:text-red-700 mt-1"><i class="fas fa-trash"></i></button>
+                    <button onclick="quitarDelCarrito(${item.id})" class="text-xs text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 mt-1"><i class="fas fa-trash"></i></button>
                 </div>
             </div>
         `).join('');
 
-        const emptyHtml = '<div class="text-center py-8 text-gray-400"><i class="fas fa-cart-arrow-down text-3xl mb-2"></i><p class="text-sm">Carrito vacio</p></div>';
+        const emptyHtml = '<div class="text-center py-8 text-gray-400 dark:text-gray-500"><i class="fas fa-cart-arrow-down text-3xl mb-2"></i><p class="text-sm">Carrito vacio</p></div>';
 
         document.getElementById('cartItems').innerHTML = items.length ? html : emptyHtml;
         document.getElementById('mobileCartItems').innerHTML = items.length ? html : emptyHtml;
@@ -376,7 +376,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const total = items.reduce((acc, item) => acc + (parseFloat(item.precio) * item.cantidad), 0);
         document.getElementById('confirmItems').innerHTML = items.map(item => `
             <div class="flex justify-between text-sm">
-                <span class="text-gray-700">${item.nombre} x${item.cantidad}</span>
+                <span class="text-gray-700 dark:text-gray-300">${item.nombre} x${item.cantidad}</span>
                 <span class="font-medium">$${(parseFloat(item.precio) * item.cantidad).toFixed(2)}</span>
             </div>
         `).join('');

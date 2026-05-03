@@ -51,19 +51,26 @@ class Proveedor(models.Model):
 
 class Producto(models.Model):
     """Producto del inventario"""
+    UNIDAD = 'unidad'
+    KILOGRAMO = 'kg'
+    GRAMO = 'g'
+    LITRO = 'litro'
+    MILILITRO = 'ml'
+    PAQUETE = 'paquete'
+    CAJA = 'caja'
     UNIDADES_MEDIDA = (
-        ('unidad', 'Unidad'),
-        ('kg', 'Kilogramos'),
-        ('g', 'Gramos'),
-        ('litro', 'Litros'),
-        ('ml', 'Mililitros'),
-        ('paquete', 'Paquete'),
-        ('caja', 'Caja'),
+        (UNIDAD, 'Unidad'),
+        (KILOGRAMO, 'Kilogramos'),
+        (GRAMO, 'Gramos'),
+        (LITRO, 'Litros'),
+        (MILILITRO, 'Mililitros'),
+        (PAQUETE, 'Paquete'),
+        (CAJA, 'Caja'),
     )
 
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(blank=True)
-    unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default='unidad')
+    unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default=UNIDAD)
     stock_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     stock_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=5)
     precio_costo = models.DecimalField(max_digits=10, decimal_places=2, default=0)
@@ -82,11 +89,3 @@ class Producto(models.Model):
 
     def necesita_reorden(self):
         return self.stock_actual < self.stock_minimo
-
-    @property
-    def precio_actual(self):
-        return self.precio_venta
-
-    @property
-    def precio_base(self):
-        return self.precio_venta
