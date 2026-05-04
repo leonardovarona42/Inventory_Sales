@@ -107,7 +107,7 @@ def ajax_agregar_carrito(request):
         carrito[key] = {
             "id": producto_id,
             "nombre": producto.nombre,
-            "precio": str(producto.precio_actual or producto.precio_base or 0),
+            "precio": str(producto.precio_venta or producto.precio_costo or 0),
             "cantidad": cantidad,
             "stock": float(producto.stock_actual),
         }

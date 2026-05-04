@@ -7,23 +7,23 @@
 <div class="flex gap-4 lg:gap-6" style="height: calc(100vh - 7rem);">
     <!-- Products Grid -->
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
-        <!-- Search Bar - full width -->
-        <div class="mb-3">
-            <div class="relative">
-                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
-                <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
-                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 text-gray-900 dark:text-white text-sm sm:text-base">
-            </div>
+    <!-- Search Bar - full width -->
+    <div class="mb-3">
+        <div class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
+            <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
+                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700 dark:text-white text-sm sm:text-base">
         </div>
+    </div>
 
         <!-- Categories - horizontal scroll -->
         <div class="mb-4">
-            <div id="categoryFilters" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin;">
+            <div id="categoryFilters" class="flex gap-2 overflow-x-auto pb-2" style="scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent;">
                 <button onclick="filterCategory('')" class="category-filter active flex-shrink-0 px-3 py-2 sm:px-4 border-2 border-primary-500 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 rounded-lg text-xs sm:text-sm font-medium transition-colors whitespace-nowrap" data-category="">
                     <i class="fas fa-th mr-1"></i> Todos
                 </button>
                 {% for cat in categorias %}
-                <button onclick="filterCategory('{{ cat }}')" class="category-filter flex-shrink-0 px-3 py-2 sm:px-4 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap" data-category="{{ cat }}">
+                <button onclick="filterCategory('{{ cat }}')" class="category-filter flex-shrink-0 px-3 py-2 sm:px-4 border border-gray-300 dark:border-gray-600 rounded-lg text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 transition-colors whitespace-nowrap" data-category="{{ cat }}">
                     {{ cat }}
                 </button>
                 {% endfor %}
@@ -219,7 +219,7 @@
 {% block extra_js %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let carrito = JSON.parse('{{ carrito_json|escapejs }}' || '{}');
+    let carrito = {{ carrito_json|safe }};
     let procesando = false;
     let metodoPago = 'efectivo';
     let activeCategory = '';
@@ -264,14 +264,23 @@ document.addEventListener('DOMContentLoaded', function() {
             cat = '';
         }
         activeCategory = cat;
+        const isDark = document.documentElement.classList.contains('dark');
         document.querySelectorAll('.category-filter').forEach(b => {
-            b.classList.remove('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium', 'dark:bg-primary-900/30', 'dark:text-primary-300');
-            b.classList.add('border', 'border-gray-300', 'dark:border-gray-600');
+            b.classList.remove('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium');
+            b.classList.add('border', 'border-gray-300');
+            if (isDark) {
+                b.classList.add('dark:border-gray-600', 'dark:text-gray-400');
+            } else {
+                b.classList.add('text-gray-600');
+            }
         });
         const btn = document.querySelector(`.category-filter[data-category="${cat}"]`);
         if (btn) {
-            btn.classList.add('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium', 'dark:bg-primary-900/30', 'dark:text-primary-300');
-            btn.classList.remove('border', 'border-gray-300', 'dark:border-gray-600');
+            btn.classList.add('active', 'border-2', 'border-primary-500', 'bg-primary-50', 'text-primary-700', 'font-medium');
+            btn.classList.remove('border', 'border-gray-300', 'dark:border-gray-600', 'dark:text-gray-400', 'text-gray-600');
+            if (isDark) {
+                btn.classList.add('dark:bg-primary-900/30', 'dark:text-primary-300');
+            }
         }
         filterProducts(document.getElementById('searchProducts').value.toLowerCase(), cat);
     };

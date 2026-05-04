@@ -77,6 +77,12 @@ class ProductoCreateView(LoginRequiredMixin, IsAdminUser, CreateView):
     template_name = 'productos/producto_form.html'
     success_url = reverse_lazy('producto_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = Categoria.objects.filter(padre__isnull=True).order_by('nombre')
+        context['selected_cats'] = []
+        return context
+
     def form_valid(self, form):
         response = super().form_valid(form)
         MovimientoStock.objects.create(
@@ -97,6 +103,16 @@ class ProductoUpdateView(LoginRequiredMixin, IsAdminUser, UpdateView):
     form_class = ProductoForm
     template_name = 'productos/producto_form.html'
     success_url = reverse_lazy('producto_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = Categoria.objects.filter(padre__isnull=True).order_by('nombre')
+        # self.object ya está disponible en UpdateView
+        if self.object:
+            context['selected_cats'] = list(self.object.categorias.values_list('id', flat=True))
+        else:
+            context['selected_cats'] = []
+        return context
 
     def form_valid(self, form):
         producto_anterior = Producto.objects.get(pk=self.object.pk)
