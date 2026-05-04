@@ -4,6 +4,7 @@
 {% block page_title %}Punto de Venta{% endblock %}
 
 {% block content %}
+{% csrf_token %}
 <div class="flex gap-4 lg:gap-6" style="height: calc(100vh - 7rem);">
     <!-- Products Grid -->
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -296,19 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function getCsrfToken() {
-        const name = 'csrftoken';
-        let cookieValue = null;
-        if (document.cookie && document.cookie !== '') {
-            const cookies = document.cookie.split(';');
-            for (let i = 0; i < cookies.length; i++) {
-                const cookie = cookies[i].trim();
-                if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                    break;
-                }
-            }
-        }
-        return cookieValue;
+        return document.querySelector('[name=csrfmiddlewaretoken]').value;
     }
 
     async function postData(url, data) {
