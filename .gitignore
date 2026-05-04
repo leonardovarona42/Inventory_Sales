@@ -33,8 +33,13 @@ db.sqlite3
 .env
 .env.local
 .env.production
+neo_sniped_postgres.txt
+neon_sniped_postgres.txt
+token.txt
 secrets.json
 config.local.py
+
+# Nota: .env ya está en .gitignore (linea 33)
 
 # Django específico
 *.log
