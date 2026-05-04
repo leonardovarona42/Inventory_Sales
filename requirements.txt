@@ -1,6 +1,6 @@
 Django==6.0.4
 django-axes==8.3.1
-Pilow==12.2.0
+Pillow==12.2.0
 psycopg[binary]==3.3.4
 gunicorn==23.0.0
 whitenoise==6.9.0
