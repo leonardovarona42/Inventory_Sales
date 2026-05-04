@@ -39,6 +39,8 @@ urlpatterns = [
     path('', include('licencias.urls')),
 ]
 
+# Always serve media and static files for offline standalone installation
+# WhiteNoise handles static files, but media (user uploads) needs explicit serving
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
