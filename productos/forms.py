@@ -25,11 +25,11 @@ class ProductoForm(forms.ModelForm):
             'unidad_medida': forms.Select(attrs={'class': INPUT}),
             'stock_actual': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
             'stock_minimo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'precio_costo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'precio_venta': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'imagen': forms.ClearableFileInput(attrs={'class': INPUT, 'accept': 'image/*'}),
+            'precio_costo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'placeholder': '0.00'}),
+            'precio_venta': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'placeholder': '0.00'}),
+            'imagen': forms.ClearableFileInput(attrs={'class': 'hidden', 'accept': 'image/*'}),
             'proveedor': forms.Select(attrs={'class': INPUT}),
-            'categorias': forms.SelectMultiple(attrs={'class': INPUT}),
+            'categorias': forms.CheckboxSelectMultiple(attrs={'class': 'hidden'}),
         }
 
     def __init__(self, *args, **kwargs):

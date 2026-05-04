@@ -61,7 +61,7 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
     total_venta = Decimal("0")
     for item in items:
         producto = item["producto"]
-        precio = producto.precio_actual or producto.precio_base or Decimal("0")
+        precio = producto.precio_venta or producto.precio_costo or Decimal("0")
         detalle = DetalleVenta.objects.create(
             venta=venta,
             id_producto=producto,

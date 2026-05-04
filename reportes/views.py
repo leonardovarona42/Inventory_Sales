@@ -45,7 +45,11 @@ class DashboardView(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
         ).values('fecha').annotate(
             total=Sum('total_pagado')
         ).order_by('fecha')
-        context['ventas_por_dia'] = list(ventas_dia)
+
+        context['ventas_por_dia'] = [
+            {'fecha': v['fecha'].strftime('%Y-%m-%d'), 'total': float(v['total'])}
+            for v in ventas_dia
+        ]
 
         ventas_por_cajero = Venta.objects.values('cajero').annotate(
             total=Count('id'),

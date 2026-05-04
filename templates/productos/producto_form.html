@@ -4,66 +4,217 @@
 {% block page_title %}{% if object %}Editar Producto{% else %}Nuevo Producto{% endif %}{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
-    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
-        <form method="post" enctype="multipart/form-data" class="space-y-4">
+<div id="productFormComponent" class="max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <form method="post" enctype="multipart/form-data" id="productForm" class="space-y-0">
             {% csrf_token %}
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre</label>
-                    {{ form.nombre }}
-                    {% if form.nombre.errors %}<p class="text-red-600 dark:text-red-400 text-xs mt-1">{{ form.nombre.errors|first }}</p>{% endif %}
+            
+            <!-- Header -->
+            <div class="px-6 py-5 border-b border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-box mr-2 text-primary-600"></i>
+                    {% if object %}Editar{% else %}Nuevo{% endif %} Producto
+                </h3>
+            </div>
+
+            <div class="p-6 space-y-6">
+                <!-- Image Upload Section -->
+                <div class="flex flex-col sm:flex-row gap-6">
+                    <div class="flex-shrink-0">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen del Producto</label>
+                        <div id="imagePreviewContainer" class="w-40 h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-700/50 cursor-pointer hover:border-primary-500 transition-colors relative">
+                            {% if object.imagen %}
+                            <img id="imagePreview" src="{{ object.imagen.url }}" alt="Preview" class="w-full h-full object-cover">
+                            {% else %}
+                            <div id="imagePlaceholder" class="text-center">
+                                <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 dark:text-gray-500 mb-2"></i>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">Click para subir</p>
+                            </div>
+                            <img id="imagePreview" class="hidden w-full h-full object-cover">
+                            {% endif %}
+                            <input type="file" id="imageInput" name="imagen" accept="image/*" class="hidden">
+                        </div>
+                    </div>
+
+                    <!-- Basic Info -->
+                    <div class="flex-1 space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Nombre del Producto</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}<p class="text-red-500 text-xs mt-1">{{ form.nombre.errors|first }}</p>{% endif %}
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Descripcion</label>
+                            {{ form.descripcion }}
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unidad de Medida</label>
+                                {{ form.unidad_medida }}
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Proveedor</label>
+                                {{ form.proveedor }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Pricing & Stock Section -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Stock Actual</label>
+                        {{ form.stock_actual }}
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Stock Minimo</label>
+                        {{ form.stock_minimo }}
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Precio de Costo</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                            {{ form.precio_costo }}
+                        </div>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Precio de Venta</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">$</span>
+                            {{ form.precio_venta }}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profit Margin Display -->
+                <div id="profitMargin" class="hidden p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-green-700 dark:text-green-400">Margen de ganancia:</span>
+                        <span id="marginValue" class="text-lg font-bold text-green-600 dark:text-green-400">0%</span>
+                    </div>
+                </div>
+
+                <!-- Categories Section -->
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unidad de Medida</label>
-                    {{ form.unidad_medida }}
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Categorias</label>
+                    <div id="categoriesGrid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
+                        {% for cat in categorias %}
+                        <label class="category-checkbox flex items-center gap-2 p-3 rounded-lg border border-gray-200 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors has-[:checked]:bg-primary-50 has-[:checked]:border-primary-500 dark:has-[:checked]:bg-primary-900/20">
+                            <input type="checkbox" name="categorias" value="{{ cat.id }}" 
+                                   {% if cat.id in selected_cats %}checked{% endif %}
+                                   class="w-4 h-4 text-primary-600 rounded border-gray-300 focus:ring-primary-500">
+                            <span class="text-sm text-gray-700 dark:text-gray-300">{{ cat.nombre }}</span>
+                        </label>
+                        {% endfor %}
+                    </div>
+                    {% if form.categorias.errors %}<p class="text-red-500 text-xs mt-1">{{ form.categorias.errors|first }}</p>{% endif %}
                 </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Descripcion</label>
-                {{ form.descripcion }}
-            </div>
-            <div class="grid grid-cols-3 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Stock Actual</label>
-                    {{ form.stock_actual }}
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Stock Minimo</label>
-                    {{ form.stock_minimo }}
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Proveedor</label>
-                    {{ form.proveedor }}
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Precio de Costo</label>
-                    {{ form.precio_costo }}
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Precio de Venta</label>
-                    {{ form.precio_venta }}
-                </div>
-            </div>
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Imagen</label>
-                    {{ form.imagen }}
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Categorias</label>
-                    {{ form.categorias }}
-                </div>
-            </div>
-            <div class="flex justify-end gap-3 pt-4 border-t border-gray-200 dark:border-gray-700">
-                <a href="{% url 'producto_list' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">Cancelar</a>
-                <button type="submit" class="px-6 py-2 bg-primary-600 dark:bg-primary-500 text-white rounded-lg hover:bg-primary-700 dark:hover:bg-primary-600">
-                    <i class="fas fa-save mr-2"></i> Guardar
+
+            <!-- Footer -->
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+                <a href="{% url 'producto_list' %}" class="px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium">
+                    Cancelar
+                </a>
+                <button type="submit" id="submitBtn" class="px-6 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium flex items-center gap-2">
+                    <i class="fas fa-save"></i>
+                    <span>Guardar Producto</span>
                 </button>
             </div>
         </form>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const component = document.getElementById('productFormComponent');
+    const form = document.getElementById('productForm');
+    const imageInput = document.getElementById('imageInput');
+    const imagePreview = document.getElementById('imagePreview');
+    const imagePlaceholder = document.getElementById('imagePlaceholder');
+    const imageContainer = document.getElementById('imagePreviewContainer');
+    const precioCosto = document.querySelector('[name="precio_costo"]');
+    const precioVenta = document.querySelector('[name="precio_venta"]');
+    const profitMargin = document.getElementById('profitMargin');
+    const marginValue = document.getElementById('marginValue');
+    const submitBtn = document.getElementById('submitBtn');
+
+    const addFormInput = (input) => {
+        if (input && !input.classList.contains('w-full')) {
+            input.classList.add('w-full', 'px-3', 'py-2', 'border', 'border-gray-300', 'dark:border-gray-600', 'rounded-lg', 'focus:ring-2', 'focus:ring-primary-500', 'focus:border-primary-500', 'dark:focus:ring-primary-400', 'bg-white', 'dark:bg-gray-700', 'text-gray-900', 'dark:text-white', 'text-sm');
+        }
+    };
+
+    document.querySelectorAll('#productForm input[type="text"], #productForm input[type="number"], #productForm select, #productForm textarea').forEach(addFormInput);
+
+    if (imageContainer) {
+        imageContainer.addEventListener('click', () => imageInput.click());
+    }
+
+    if (imageInput) {
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    imagePreview.src = e.target.result;
+                    imagePreview.classList.remove('hidden');
+                    if (imagePlaceholder) imagePlaceholder.classList.add('hidden');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+
+    function updateProfitMargin() {
+        const costo = parseFloat(precioCosto.value) || 0;
+        const venta = parseFloat(precioVenta.value) || 0;
+        
+        if (costo > 0 && venta > 0) {
+            const margin = ((venta - costo) / costo * 100).toFixed(1);
+            marginValue.textContent = margin + '%';
+            profitMargin.classList.remove('hidden');
+            
+            if (parseFloat(margin) < 0) {
+                profitMargin.className = 'p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-200 dark:border-red-800';
+                marginValue.className = 'text-lg font-bold text-red-600 dark:text-red-400';
+            } else {
+                profitMargin.className = 'p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800';
+                marginValue.className = 'text-lg font-bold text-green-600 dark:text-green-400';
+            }
+        } else {
+            profitMargin.classList.add('hidden');
+        }
+    }
+
+    if (precioCosto) precioCosto.addEventListener('input', updateProfitMargin);
+    if (precioVenta) precioVenta.addEventListener('input', updateProfitMargin);
+    updateProfitMargin();
+
+    form.addEventListener('submit', function(e) {
+        const requiredFields = form.querySelectorAll('[required]');
+        let isValid = true;
+        
+        requiredFields.forEach(field => {
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+            } else {
+                field.classList.remove('border-red-500', 'ring-2', 'ring-red-200');
+            }
+        });
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos requeridos');
+            return;
+        }
+
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Guardando...</span>';
+    });
+});
+</script>
 {% endblock %}

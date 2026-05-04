@@ -22,7 +22,9 @@ def env(key, default=None, cast=None):
     if value is None:
         return None
     if cast == bool:
-        return value.lower() in ('true', '1', 'yes')
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in ('true', '1', 'yes')
     if cast == int:
         return int(value)
     return value
@@ -37,11 +39,12 @@ SECRET_KEY = env('DJANGO_SECRET_KEY', 'django-insecure--y9j3lam)@cw=g8o2foviuh3)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', True, cast=bool)
 
-ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,void-delta-tidal.ngrok-free.dev').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.app',
     'https://*.ngrok-free.dev',
+    'https://void-delta-tidal.ngrok-free.dev',
 ]
 if ngrok_http := env('DJANGO_CSRF_NGROK_HTTP'):
     CSRF_TRUSTED_ORIGINS.extend(ngrok_http.split(','))
