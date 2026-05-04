@@ -22,18 +22,21 @@
                 <div class="flex flex-col sm:flex-row gap-6">
                     <div class="flex-shrink-0">
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Imagen del Producto</label>
-                        <div id="imagePreviewContainer" class="w-40 h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-50 dark:bg-gray-700/50 cursor-pointer hover:border-primary-500 transition-colors relative">
+                        <div id="imagePreviewContainer" class="w-40 h-40 rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 flex items-center justify-center overflow-hidden bg-gray-100 dark:bg-gray-700 cursor-pointer hover:border-primary-500 transition-colors relative">
                             {% if object.imagen %}
-                            <img id="imagePreview" src="{{ object.imagen.url }}" alt="Preview" class="w-full h-full object-cover">
+                            <img src="{{ object.imagen.url }}" alt="Imagen actual" class="w-full h-full object-cover" id="existingImage">
                             {% else %}
                             <div id="imagePlaceholder" class="text-center">
                                 <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 dark:text-gray-500 mb-2"></i>
                                 <p class="text-xs text-gray-500 dark:text-gray-400">Click para subir</p>
                             </div>
-                            <img id="imagePreview" class="hidden w-full h-full object-cover">
                             {% endif %}
+                            <img id="imagePreview" class="hidden w-full h-full object-cover">
                             <input type="file" id="imageInput" name="imagen" accept="image/*" class="hidden">
                         </div>
+                        {% if object.imagen %}
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">Imagen actual</p>
+                        {% endif %}
                     </div>
 
                     <!-- Basic Info -->
@@ -165,6 +168,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 };
                 reader.readAsDataURL(file);
             }
+        });
+    }
+
+    // Add error handler to existing images
+    const existingImage = document.getElementById('existingImage');
+    if (existingImage) {
+        existingImage.addEventListener('error', function() {
+            this.style.display = 'none';
+            const container = document.getElementById('imagePreviewContainer');
+            container.innerHTML = '<div class="text-center text-gray-400 dark:text-gray-500"><i class="fas fa-exclamation-triangle text-2xl mb-2"></i><p class="text-xs">Imagen no disponible</p></div>';
         });
     }
 

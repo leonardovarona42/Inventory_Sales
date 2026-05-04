@@ -6,88 +6,126 @@
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-        <div class="px-6 py-4 bg-gray-50 border-b flex items-center justify-between">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
             <div class="flex items-center gap-4">
-                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center">
+                <div class="w-16 h-16 bg-gray-100 dark:bg-gray-700 rounded-xl flex items-center justify-center overflow-hidden">
                     {% if producto.imagen %}
-                        <img src="{{ producto.imagen.url }}" class="w-full h-full object-cover rounded-xl">
+                        <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="w-full h-full object-cover" onerror="this.style.display='none'; this.parentElement.innerHTML='<i class=\'fas fa-exclamation-triangle text-gray-400 dark:text-gray-500 text-2xl\'></i>';">
                     {% else %}
                         <i class="fas fa-box text-gray-400 text-2xl"></i>
                     {% endif %}
                 </div>
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">{{ producto.nombre }}</h2>
-                    <p class="text-sm text-gray-500">{{ producto.unidad_medida }}</p>
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">{{ producto.nombre }}</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ producto.get_unidad_medida_display }}</p>
                 </div>
             </div>
             <div class="flex gap-2">
                 <a href="{% url 'producto_update' producto.id %}" class="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm"><i class="fas fa-edit mr-1"></i> Editar</a>
-                <a href="{% url 'producto_list' %}" class="px-3 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 text-sm"><i class="fas fa-arrow-left mr-1"></i> Volver</a>
+                <a href="{% url 'producto_list' %}" class="px-3 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 text-sm"><i class="fas fa-arrow-left mr-1"></i> Volver</a>
             </div>
         </div>
 
+        <!-- Stats Grid -->
         <div class="p-6 grid grid-cols-2 md:grid-cols-4 gap-6">
-            <div class="p-4 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 uppercase">Stock Actual</p>
-                <p class="text-2xl font-bold {% if necesita_reorden %}text-red-600{% else %}text-green-600{% endif %}">{{ producto.stock_actual }}</p>
-                {% if necesita_reorden %}<p class="text-xs text-red-500 mt-1"><i class="fas fa-triangle-exclamation"></i> Bajo stock</p>{% endif %}
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Stock Actual</p>
+                <p class="text-2xl font-bold {% if necesita_reorden %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">{{ producto.stock_actual }}</p>
+                {% if necesita_reorden %}<p class="text-xs text-red-500 dark:text-red-400 mt-1"><i class="fas fa-triangle-exclamation"></i> Bajo stock</p>{% endif %}
             </div>
-            <div class="p-4 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 uppercase">Stock Minimo</p>
-                <p class="text-2xl font-bold text-gray-700">{{ producto.stock_minimo }}</p>
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Stock Minimo</p>
+                <p class="text-2xl font-bold text-gray-700 dark:text-gray-300">{{ producto.stock_minimo }}</p>
             </div>
-            <div class="p-4 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 uppercase">Precio Venta</p>
-                <p class="text-2xl font-bold text-green-600">${{ producto.precio_venta|floatformat:2 }}</p>
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Precio Venta</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">${{ producto.precio_venta|floatformat:2 }}</p>
             </div>
-            <div class="p-4 bg-gray-50 rounded-lg">
-                <p class="text-xs text-gray-500 uppercase">Valor Total</p>
-                <p class="text-2xl font-bold text-primary-600">${{ valor_total|floatformat:2 }}</p>
+            <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Valor Total</p>
+                <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">${{ valor_total|floatformat:2 }}</p>
             </div>
         </div>
 
+        <!-- Categories -->
         {% if producto.categorias.all %}
-        <div class="px-6 py-3 border-t border-gray-100">
-            <p class="text-sm text-gray-500 mb-2">Categorias</p>
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">Categorias</p>
             <div class="flex gap-2 flex-wrap">
                 {% for cat in producto.categorias.all %}
-                <span class="px-3 py-1 bg-primary-50 text-primary-700 rounded-full text-sm">{{ cat }}</span>
+                <span class="px-3 py-1 bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300 rounded-full text-sm">{{ cat }}</span>
                 {% endfor %}
             </div>
         </div>
         {% endif %}
 
-        {% if producto.proveedor %}
-        <div class="px-6 py-3 border-t border-gray-100">
-            <p class="text-sm text-gray-500">Proveedor: <span class="font-medium text-gray-900">{{ producto.proveedor.nombre }}</span></p>
+        <!-- Description -->
+        {% if producto.descripcion %}
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-1">Descripcion</p>
+            <p class="text-sm text-gray-700 dark:text-gray-300">{{ producto.descripcion }}</p>
         </div>
         {% endif %}
 
-        {% if movimientos %}
-        <div class="px-6 py-4 border-t border-gray-100">
-            <h4 class="font-medium text-gray-900 mb-3">Ultimos Movimientos</h4>
-            <table class="w-full text-sm">
-                <thead class="text-gray-500 border-b">
-                    <tr>
-                        <th class="py-2 text-left">Fecha</th>
-                        <th class="py-2 text-left">Tipo</th>
-                        <th class="py-2 text-center">Cantidad</th>
-                        <th class="py-2 text-left">Motivo</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-50">
-                    {% for mov in movimientos %}
-                    <tr>
-                        <td class="py-2 text-gray-500">{{ mov.fecha|date:"d/m/Y H:i" }}</td>
-                        <td class="py-2"><span class="px-2 py-0.5 rounded-full text-xs {% if mov.tipo == 'entrada' %}bg-green-100 text-green-800{% else %}bg-red-100 text-red-800{% endif %}">{{ mov.get_tipo_display }}</span></td>
-                        <td class="py-2 text-center font-medium">{{ mov.cantidad }}</td>
-                        <td class="py-2 text-gray-500">{{ mov.get_motivo_display }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+        <!-- Product Image (full size) -->
+        {% if producto.imagen %}
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400 mb-3">Imagen del Producto</p>
+            <div class="rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 inline-block">
+                <img src="{{ producto.imagen.url }}" alt="{{ producto.nombre }}" class="max-h-64 w-auto object-contain" onerror="this.parentElement.innerHTML='<div class=\'p-8 text-center\'><i class=\'fas fa-exclamation-triangle text-2xl text-gray-400 dark:text-gray-500\'></i><p class=\'text-sm text-gray-500 dark:text-gray-400 mt-2\'>Imagen no disponible</p></div>';">
+            </div>
         </div>
         {% endif %}
+
+        <!-- Provider -->
+        {% if producto.proveedor %}
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Proveedor: <span class="font-medium text-gray-900 dark:text-white">{{ producto.proveedor.nombre }}</span></p>
+        </div>
+        {% endif %}
+
+        <!-- Price Cost -->
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
+            <p class="text-sm text-gray-500 dark:text-gray-400">Precio Costo: <span class="font-medium text-gray-900 dark:text-white">${{ producto.precio_costo|floatformat:2 }}</span></p>
+        </div>
+
+        <!-- Movements -->
+        {% if movimientos %}
+        <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">
+            <h4 class="font-medium text-gray-900 dark:text-white mb-3">Ultimos Movimientos</h4>
+            <div class="overflow-x-auto">
+                <table class="w-full text-sm">
+                    <thead class="text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700">
+                        <tr>
+                            <th class="py-2 text-left">Fecha</th>
+                            <th class="py-2 text-left">Tipo</th>
+                            <th class="py-2 text-center">Cantidad</th>
+                            <th class="py-2 text-left">Motivo</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
+                        {% for mov in movimientos %}
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ mov.fecha|date:"d/m/Y H:i" }}</td>
+                            <td class="py-2"><span class="px-2 py-0.5 rounded-full text-xs {% if mov.tipo == 'entrada' %}bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-300{% else %}bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-300{% endif %}">{{ mov.get_tipo_display }}</span></td>
+                            <td class="py-2 text-center font-medium text-gray-900 dark:text-white">{{ mov.cantidad }}</td>
+                            <td class="py-2 text-gray-600 dark:text-gray-400">{{ mov.get_motivo_display }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Created/Updated -->
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+            <div class="flex justify-between text-xs text-gray-400 dark:text-gray-500">
+                <span>Creado: {{ producto.created_at|date:"d/m/Y H:i" }}</span>
+                <span>Actualizado: {{ producto.updated_at|date:"d/m/Y H:i" }}</span>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}
