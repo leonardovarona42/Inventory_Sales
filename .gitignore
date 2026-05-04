@@ -95,3 +95,4 @@ celerybeat.pid
 # Archivos de instrucciones (no subir al repo)
 instrucciones.md
 INSTRUCCIONES.md
+.vercel
