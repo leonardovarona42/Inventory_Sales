@@ -105,31 +105,39 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 ```
 
-### 2. Configurar base de datos
-Edita `Inventory_Sales/settings.py`:
-```python
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'inventory_sales',
-        'USER': 'postgres',
-        'PASSWORD': 'tu_password',
-        'HOST': 'localhost',
-        'PORT': '5432',
-    }
-}
+### 2. Configurar variables de entorno
+Copia `.env.example` a `.env` y edítalo:
+```bash
+cp .env.example .env
 ```
 
-### 3. Migrar y poblar
+Edita `.env` con tus valores:
+```env
+DJANGO_SECRET_KEY=tu-clave-secreta-aqui
+DJANGO_DEBUG=False
+DJANGO_ALLOWED_HOSTS=localhost,127.0.0.1,tu-dominio.com
+DB_ENGINE=django.db.backends.postgresql
+DB_NAME=inventory_sales
+DB_USER=postgres
+DB_PASSWORD=tu_password
+DB_HOST=localhost
+DB_PORT=5432
+```
+
+### 3. Instalar dependencias
 ```bash
-python manage.py makemigrations
+pip install -r requirements.txt
+```
+
+### 4. Migrar y poblar
+```bash
 python manage.py migrate
 python manage.py populate_categories   # Categorías y productos ejemplo
 python manage.py setup_groups          # Roles: Superadmin, Admin, Cajero
 python manage.py createsuperuser       # Usuario administrador
 ```
 
-### 4. Ejecutar
+### 5. Ejecutar
 ```bash
 python manage.py runserver
 ```

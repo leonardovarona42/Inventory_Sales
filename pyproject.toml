@@ -1,0 +1,4 @@
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "Inventory_Sales.settings"
+python_files = ["test_*.py", "*_test.py"]
+addopts = ["--ds=Inventory_Sales.settings", "--tb=short"]
