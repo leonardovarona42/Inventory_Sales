@@ -60,7 +60,17 @@ def hash_licencia(licencia_texto: str) -> str:
     return hashlib.sha256(licencia_texto.encode("utf-8")).hexdigest()
 
 
-def verificar_vencimiento(payload: dict, ultima_verificacion: datetime = None) -> tuple[bool, str]:
+def _to_utc_aware(dt):
+    """Convierte datetime a timezone-aware UTC."""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        from django.utils import timezone as django_tz
+        return django_tz.make_aware(dt, dt_timezone.utc)
+    return dt.astimezone(dt_timezone.utc)
+
+
+def verificar_vencimiento(payload: dict, ultima_verificacion=None) -> tuple[bool, str]:
     """
     Verifica si una licencia está vigente.
     Usa ultima_verificacion para detectar manipulación del reloj.
@@ -73,20 +83,26 @@ def verificar_vencimiento(payload: dict, ultima_verificacion: datetime = None) -
     if not vencimiento_str:
         return False, "Licencia sin fecha de vencimiento"
 
-    vencimiento = datetime.fromisoformat(vencimiento_str)
     ahora = datetime.now(dt_timezone.utc)
 
-    # Detectar manipulación de reloj
-    if ultima_verificacion:
-        if ultima_verificacion.tzinfo is None:
-            from django.utils import timezone as django_tz
-            ultima_verificacion = django_tz.make_aware(ultima_verificacion)
+    # Asegurar que vencimiento sea timezone-aware UTC
+    vencimiento = _to_utc_aware(datetime.fromisoformat(vencimiento_str))
 
-        if ahora < ultima_verificacion:
-            # El reloj retrocedió
-            ahora_efectivo = ultima_verificacion
-        else:
-            ahora_efectivo = ahora
+    # Si no hay ultima_verificacion, verificar directamente contra ahora
+    if ultima_verificacion is None:
+        if ahora > vencimiento:
+            return False, f"Licencia vencida el {vencimiento.strftime('%Y-%m-%d %H:%M')}"
+        dias_restantes = (vencimiento - ahora).days
+        if dias_restantes <= 30:
+            return True, f"Licencia vigente - vence en {dias_restantes} días"
+        return True, "Licencia vigente"
+
+    # Asegurar ultima_verificacion como timezone-aware UTC
+    ultima_verificacion = _to_utc_aware(ultima_verificacion)
+
+    # Detectar manipulación de reloj
+    if ahora < ultima_verificacion:
+        ahora_efectivo = ultima_verificacion
     else:
         ahora_efectivo = ahora
 

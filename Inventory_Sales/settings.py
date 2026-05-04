@@ -53,7 +53,22 @@ if not SECRET_KEY:
     SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', False, cast=bool)
+# DEBUG se fuerza a False si hay LICENSE_SECRET configurada (produccion)
+_DEBUG_DEFAULT = False
+if env('LICENSE_SECRET', ''):
+    _DEBUG_DEFAULT = False  # Forzar DEBUG=False en produccion
+DEBUG = env('DJANGO_DEBUG', _DEBUG_DEFAULT, cast=bool)
+
+# Si DEBUG=True en produccion, advertir y forzar False
+if DEBUG and env('LICENSE_SECRET', ''):
+    import warnings
+    warnings.warn(
+        "DEBUG=True detectado con LICENSE_SECRET configurada. "
+        "Forzando DEBUG=False para proteger secretos. "
+        "Use DJANGO_DEBUG=True explicitamente solo para desarrollo.",
+        RuntimeWarning
+    )
+    DEBUG = False
 
 ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 

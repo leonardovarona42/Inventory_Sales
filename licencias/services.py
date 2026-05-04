@@ -6,6 +6,7 @@ from datetime import datetime
 
 from django.utils import timezone
 from django.db import transaction
+from django.db.utils import IntegrityError
 
 from .models import Licencia
 from .license_core import verificar_licencia as verificar_firma, hash_licencia, verificar_vencimiento
@@ -21,6 +22,11 @@ def obtener_licencia_activa() -> Licencia | None:
 def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
     """
     Activa una nueva licencia.
+    Verificacion de seguridad:
+    1. Firma HMAC
+    2. Nonce unico (previene reuso)
+    3. Vencimiento valido
+    4. Hash unico (previene duplicados exactos)
     Retorna: (exito, mensaje, licencia)
     """
     # 1. Verificar firma HMAC
@@ -30,18 +36,23 @@ def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
 
     # 2. Verificar que no esté ya usada (nonce único)
     nonce = payload.get("nonce")
-    existente = Licencia.objects.filter(nonce=nonce).first()
-    if existente:
-        if existente.activa:
-            return False, "Esta licencia ya esta activa", existente
+    existente_nonce = Licencia.objects.filter(nonce=nonce).first()
+    if existente_nonce:
+        if existente_nonce.activa:
+            return False, "Esta licencia ya esta activa", existente_nonce
         return False, "Esta licencia ya fue usada y desactivada anteriormente", None
 
-    # 3. Verificar vencimiento
+    # 3. Verificar que el hash no exista (previene re-registro)
+    lic_hash = hash_licencia(licencia_texto)
+    if Licencia.objects.filter(clave_hash=lic_hash).exists():
+        return False, "Esta licencia ya esta registrada en el sistema", None
+
+    # 4. Verificar vencimiento
     es_valida, mensaje = verificar_vencimiento(payload)
     if not es_valida:
         return False, mensaje, None
 
-    # 4. Desactivar licencia anterior si existe
+    # 5. Desactivar licencia anterior si existe
     with transaction.atomic():
         anterior = obtener_licencia_activa()
         if anterior:
@@ -51,7 +62,7 @@ def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
             anterior.save(update_fields=["activa", "fecha_desactivacion", "motivo_desactivacion", "actualizada_en"])
             logger.info("Licencia anterior desactivada: %s", anterior)
 
-        # 5. Crear nueva licencia
+        # 6. Crear nueva licencia
         vencimiento_str = payload.get("vencimiento")
         fecha_vencimiento = None
         if vencimiento_str:
@@ -60,18 +71,23 @@ def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
                 from django.utils import timezone as tz
                 fecha_vencimiento = tz.make_aware(fecha_vencimiento)
 
-        licencia = Licencia.objects.create(
-            cliente_nombre=payload["cliente"],
-            emisor_nombre=payload["emisor"],
-            emisor_ci=payload["ci"],
-            tipo=payload["tipo"],
-            nonce=nonce,
-            clave_hash=hash_licencia(licencia_texto),
-            fecha_activacion=timezone.now(),
-            fecha_vencimiento=fecha_vencimiento,
-            activa=True,
-            ultima_verificacion=timezone.now(),
-        )
+        try:
+            licencia = Licencia.objects.create(
+                cliente_nombre=payload["cliente"],
+                emisor_nombre=payload["emisor"],
+                emisor_ci=payload["ci"],
+                tipo=payload["tipo"],
+                nonce=nonce,
+                clave_hash=lic_hash,
+                fecha_activacion=timezone.now(),
+                fecha_vencimiento=fecha_vencimiento,
+                activa=True,
+                ultima_verificacion=timezone.now(),
+            )
+        except IntegrityError as e:
+            if "nonce" in str(e) or "clave_hash" in str(e):
+                return False, "Esta licencia ya fue procesada", None
+            raise
 
     logger.info("Nueva licencia activada: %s (%s)", licencia.cliente_nombre, licencia.tipo)
     return True, mensaje, licencia

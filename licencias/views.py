@@ -2,6 +2,7 @@
 Vistas para activación de licencias.
 """
 import logging
+import time
 
 from django.shortcuts import render, redirect
 from django.contrib import messages
@@ -12,6 +13,29 @@ from django.contrib.auth.decorators import login_required
 from .services import activar_licencia, obtener_licencia_activa, verificar_y_actualizar
 
 logger = logging.getLogger(__name__)
+
+# Rate limiting simple para activacion (5 intentos por minuto por IP)
+_ACTIVATION_ATTEMPTS = {}
+_RATE_LIMIT_WINDOW = 60  # segundos
+_RATE_LIMIT_MAX = 5
+
+
+def _check_rate_limit(request):
+    """Verifica rate limiting por IP."""
+    ip = request.META.get("REMOTE_ADDR", "unknown")
+    now = time.time()
+
+    if ip not in _ACTIVATION_ATTEMPTS:
+        _ACTIVATION_ATTEMPTS[ip] = []
+
+    # Limpiar intentos viejos
+    _ACTIVATION_ATTEMPTS[ip] = [t for t in _ACTIVATION_ATTEMPTS[ip] if now - t < _RATE_LIMIT_WINDOW]
+
+    if len(_ACTIVATION_ATTEMPTS[ip]) >= _RATE_LIMIT_MAX:
+        return False
+
+    _ACTIVATION_ATTEMPTS[ip].append(now)
+    return True
 
 
 @require_GET
@@ -35,6 +59,11 @@ def activar_licencia_view(request):
 @csrf_protect
 def procesar_activacion(request):
     """Procesa la activación de una nueva licencia."""
+    # Rate limiting
+    if not _check_rate_limit(request):
+        messages.error(request, "Demasiados intentos. Espere un momento e intente de nuevo.")
+        return redirect("activar_licencia")
+
     licencia_texto = request.POST.get("licencia", "").strip()
 
     if not licencia_texto:
@@ -85,6 +114,11 @@ def acerca_de_view(request):
 @require_POST
 def renovar_licencia_view(request):
     """Renueva la licencia con una nueva clave."""
+    # Rate limiting
+    if not _check_rate_limit(request):
+        messages.error(request, "Demasiados intentos. Espere un momento e intente de nuevo.")
+        return redirect("acerca_de")
+
     licencia_texto = request.POST.get("licencia", "").strip()
 
     if not licencia_texto:
