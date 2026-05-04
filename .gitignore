@@ -1,11 +1,16 @@
- # Entorno virtual
+# ============================================
+# Entornos virtuales
+# ============================================
 venv/
 env/
 ENV/
 env.bak/
 venv.bak/
+.venv/
 
+# ============================================
 # Python
+# ============================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -14,35 +19,50 @@ __pycache__/
 *.egg-info/
 dist/
 build/
+*.spec
 
-# Base de datos (importante: no subir SQLite local)
+# ============================================
+# Base de datos
+# ============================================
 db.sqlite3
 *.db
 *.sqlite3
 
-# Archivos media (imágenes subidas por usuarios)
+# ============================================
+# Media y archivos subidos por usuarios
+# ============================================
 /media/
 /recetas_imagenes/
 /productos_imagenes/
 
-# Archivos estáticos recolectados
+# ============================================
+# Archivos estaticos recolectados
+# ============================================
 /staticfiles/
-/static/
 
+# ============================================
 # Variables de entorno y secretos
+# ============================================
 .env
 .env.local
 .env.production
 secrets.json
 config.local.py
+token.txt
+neon_sniped_postgres.txt
+neon_sniped_postgres.txt.*
 
-# Django específico
+# ============================================
+# Django
+# ============================================
 *.log
 *.pot
 *.mo
 local_settings.py
 
+# ============================================
 # IDEs y editores
+# ============================================
 .vscode/
 .idea/
 *.swp
@@ -51,47 +71,75 @@ local_settings.py
 .DS_Store
 Thumbs.db
 
-# Archivos de logs
-logs/
-*.log
-
-# Archivos temporales del sistema
-*.tmp
-*.temp
-*.bak
-*.backup
-
-# Reportes generados
-*.pdf
-*.xlsx
-reportes_exportados/
-
-# Tests
+# ============================================
+# Tests y cobertura
+# ============================================
 .coverage
 htmlcov/
 .pytest_cache/
 .tox/
 
-# Celery (si usás)
+# ============================================
+# Notebooks y archivos temporales
+# ============================================
+.ipynb_checkpoints/
+*.ipynb
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# ============================================
+# Reportes generados
+# ============================================
+*.pdf
+*.xlsx
+reportes_exportados/
+
+# ============================================
+# Celery
+# ============================================
 celerybeat-schedule
 celerybeat.pid
 
-# Notebooks Jupyter (si usás)
-.ipynb_checkpoints/
-*.ipynb
-
-# Archivos de backup de Windows
+# ============================================
+# Windows installers
+# ============================================
 *.cab
 *.msi
 *.msm
 *.msp
 
-# Archivos comprimidos temporales
+# ============================================
+# Archivos comprimidos (no subir builds)
+# ============================================
 *.zip
 *.rar
 *.7z
 *.tar.gz
 
-# Archivos de instrucciones (no subir al repo)
+# ============================================
+# Documentacion interna (no subir)
+# ============================================
 instrucciones.md
 INSTRUCCIONES.md
+
+# ============================================
+# KeyManagement - Generador de licencias (NO subir)
+# ============================================
+../KeyManagement/
+KeyManagement/
+keymanagement/
+licenses.db
+
+# ============================================
+# Build artifacts del instalador (NO subir)
+# ============================================
+deploy/dist/
+deploy/build_output/
+deploy/pip_packages/
+
+# ============================================
+# Vercel deploy cache
+# ============================================
+.vercel/

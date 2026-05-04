@@ -83,6 +83,7 @@ INSTALLED_APPS = [
     'ventas',
     'reportes',
     'usuarios',
+    'licencias',
 ]
 
 MIDDLEWARE = [
@@ -92,6 +93,7 @@ MIDDLEWARE = [
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'licencias.middleware.LicenseMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -138,7 +140,10 @@ LOGIN_URL = '/accounts/login/'
 # Brute force protection (django-axes)
 AXES_ENABLED = env('AXES_ENABLED', True, cast=bool)
 AXES_FAILURE_LIMIT = env('AXES_FAILURE_LIMIT', 5, cast=int)
-AXES_COOLOFF_TIME = env('AXES_COOLOFF_TIME', 1)  # hours
+from datetime import timedelta
+
+_AXES_HOURS = env('AXES_COOLOFF_TIME', default=1, cast=int)
+AXES_COOLOFF_TIME = timedelta(hours=_AXES_HOURS)
 AXES_LOCKOUT_TEMPLATE = None  # Uses default login with error
 AXES_RESET_ON_SUCCESS = True
 AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'
@@ -215,6 +220,9 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = env('SECURE_HSTS_INCLUDE_SUBDOMAINS', False, ca
 SECURE_HSTS_PRELOAD = env('SECURE_HSTS_PRELOAD', False, cast=bool)
 X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# License key for validation (MUST match KeyManagement LICENSE_SECRET)
+LICENSE_SECRET = env('LICENSE_SECRET', '')
 
 # Content Security Policy (basic, opt-in via env)
 CONTENT_SECURITY_POLICY = env('CONTENT_SECURITY_POLICY', None)

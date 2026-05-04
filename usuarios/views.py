@@ -12,6 +12,10 @@ from .forms import UsuarioForm, CambiarPasswordForm
 
 
 def _es_superadmin(user):
+    if not user or not user.is_authenticated:
+        return False
+    if user.is_superuser:
+        return True
     return user.groups.filter(name="Superadmin").exists()
 
 

@@ -1,0 +1,9 @@
+"""
+Installer for InventorySales.
+Dependencies for the installer itself.
+"""
+psycopg2-binary>=2.9.0
+pyinstaller>=6.0.0
+pywin32>=306
+requests>=2.31.0
+python-dotenv>=1.0.0

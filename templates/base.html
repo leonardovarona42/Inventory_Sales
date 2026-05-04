@@ -114,6 +114,9 @@
                 <a href="{% url 'proveedor_list' %}" class="sidebar-link {% if 'proveedor' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-truck w-5 text-center"></i><span>Proveedores</span>
                 </a>
+                <a href="{% url 'acerca_de' %}" class="sidebar-link {% if 'acerca' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-circle-info w-5 text-center"></i><span>Acerca de</span>
+                </a>
                 {% endif %}
             </nav>
 
