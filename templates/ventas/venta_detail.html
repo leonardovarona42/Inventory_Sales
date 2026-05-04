@@ -1,27 +1,71 @@
 {% extends 'base.html' %}
 
 {% block title %}Detalle de Venta{% endblock %}
+{% block page_title %}Detalle de Venta{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-    <h2 class="mb-3">Venta #{{ venta.id }}</h2>
-    <div class="card mb-3">
-        <div class="card-body">
-            <p><strong>Fecha:</strong> {{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
-            <p><strong>Metodo de pago:</strong> {{ venta.get_metodo_pago_display }}</p>
-            <p><strong>Total:</strong> ${{ venta.total_pagado|floatformat:2 }}</p>
+<div class="max-w-3xl mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <!-- Header -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div>
+                <h3 class="text-lg font-semibold text-gray-900 dark:text-white">Ticket: {{ venta.codigo_ticket }}</h3>
+                <p class="text-sm text-gray-500 dark:text-gray-400">{{ venta.fecha_venta|date:"d/m/Y H:i" }}</p>
+            </div>
+            <span class="px-3 py-1 bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 rounded-full text-sm font-medium">
+                <i class="fas fa-check mr-1"></i> Completada
+            </span>
+        </div>
+
+        <!-- Info -->
+        <div class="px-6 py-4 grid grid-cols-2 gap-4 border-b border-gray-100 dark:border-gray-700">
+            <div>
+                <p class="text-xs text-gray-500 uppercase dark:text-gray-400">Cajero</p>
+                <p class="font-medium">{{ venta.cajero|default:"-" }}</p>
+            </div>
+            <div>
+                <p class="text-xs text-gray-500 uppercase dark:text-gray-400">Metodo de Pago</p>
+                <p class="font-medium">{{ venta.get_metodo_pago_display }}</p>
+            </div>
+        </div>
+
+        <!-- Items -->
+        <div class="px-6 py-4">
+            <h4 class="font-medium text-gray-900 mb-3 dark:text-white">Productos</h4>
+            <table class="w-full">
+                <thead class="text-xs text-gray-500 uppercase border-b dark:text-gray-400">
+                    <tr>
+                        <th class="py-2 text-left">Producto</th>
+                        <th class="py-2 text-center">Cant.</th>
+                        <th class="py-2 text-right">Precio</th>
+                        <th class="py-2 text-right">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
+                    {% for detalle in venta.detalles.all %}
+                    <tr>
+                        <td class="py-3">{{ detalle.id_producto.nombre }}</td>
+                        <td class="py-3 text-center">{{ detalle.cantidad }}</td>
+                        <td class="py-3 text-right">${{ detalle.precio_unitario|floatformat:2 }}</td>
+                        <td class="py-3 text-right font-medium">${{ detalle.cantidad|floatformat:0|add:"0"|mul:detalle.precio_unitario|floatformat:2 }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="border-t-2 border-gray-200 dark:border-gray-700">
+                        <td colspan="3" class="py-4 text-right font-semibold text-lg">Total</td>
+                        <td class="py-4 text-right font-bold text-lg text-green-600 dark:text-green-400">${{ venta.total_pagado|floatformat:2 }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        <!-- Actions -->
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800 flex justify-end gap-3">
+            <a href="{% url 'venta_list' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-arrow-left mr-2"></i> Volver
+            </a>
         </div>
     </div>
-    <h5>Detalles</h5>
-    <ul class="list-group">
-        {% for detalle in venta.detalles.all %}
-        <li class="list-group-item d-flex justify-content-between">
-            <span>{{ detalle.id_producto_final.nombre }} x {{ detalle.cantidad }}</span>
-            <span>${{ detalle.precio_unitario|floatformat:2 }}</span>
-        </li>
-        {% empty %}
-        <li class="list-group-item">Sin detalles.</li>
-        {% endfor %}
-    </ul>
 </div>
 {% endblock %}

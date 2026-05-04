@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Usuario{% endblock %}
+{% block page_title %}Eliminar Usuario{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 text-center">
+        <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+            <i class="fas fa-triangle-exclamation text-red-600 dark:text-red-400 text-2xl"></i>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Eliminar Usuario</h3>
+        <p class="text-gray-600 dark:text-gray-300 mb-6">Estas seguro que deseas eliminar a <strong>{{ object.username }}</strong>?</p>
+        <form method="post" class="flex gap-3 justify-center">
+            {% csrf_token %}
+            <a href="{% url 'usuario_list' %}" class="px-4 py-2 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800">Cancelar</a>
+            <button type="submit" class="px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800">Eliminar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

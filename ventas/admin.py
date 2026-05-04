@@ -10,15 +10,15 @@ class DetalleVentaInline(admin.TabularInline):
 
 @admin.register(Venta)
 class VentaAdmin(admin.ModelAdmin):
-    list_display = ('id', 'orden', 'fecha_venta', 'metodo_pago', 'total_pagado')
+    list_display = ('codigo_ticket', 'cajero', 'cajero_user', 'fecha_venta', 'metodo_pago', 'total_pagado')
     list_filter = ('metodo_pago', 'fecha_venta')
-    search_fields = ('orden__numero_orden', 'id')
+    search_fields = ('codigo_ticket', 'cajero')
     readonly_fields = ('fecha_venta', 'created_at', 'updated_at', 'total_pagado')
     inlines = [DetalleVentaInline]
     date_hierarchy = 'fecha_venta'
     fieldsets = (
-        ('Información de la Venta', {
-            'fields': ('orden', 'metodo_pago')
+        ('Informacion de la Venta', {
+            'fields': ('codigo_ticket', 'cajero', 'cajero_user', 'metodo_pago')
         }),
         ('Totales', {
             'fields': ('total_pagado',)
@@ -32,7 +32,7 @@ class VentaAdmin(admin.ModelAdmin):
 
 @admin.register(DetalleVenta)
 class DetalleVentaAdmin(admin.ModelAdmin):
-    list_display = ('venta', 'id_producto_final', 'cantidad', 'precio_unitario')
-    list_filter = ('id_producto_final', 'created_at')
-    search_fields = ('id_producto_final__nombre',)
+    list_display = ('venta', 'id_producto', 'cantidad', 'precio_unitario')
+    list_filter = ('id_producto', 'created_at')
+    search_fields = ('id_producto__nombre',)
     readonly_fields = ('precio_unitario', 'created_at')

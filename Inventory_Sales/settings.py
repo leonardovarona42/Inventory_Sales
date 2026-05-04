@@ -11,21 +11,59 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+load_dotenv(BASE_DIR / '.env')
+
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Environment variables helper
+def env(key, default=None, cast=None):
+    value = os.environ.get(key, default)
+    if value is None:
+        return None
+    if cast == bool:
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in ('true', '1', 'yes')
+    if cast == int:
+        return int(value)
+    return value
 
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9'
+SECRET_KEY = env('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    import sys
+    import warnings
+    if not env('DJANGO_ALLOW_DEBUG_FALLBACK', False, cast=bool):
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY no configurada. Configure la variable de entorno antes de iniciar."
+        )
+    warnings.warn("Usando SECRET_KEY inseguro de fallback. Solo para desarrollo.", RuntimeWarning)
+    SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DJANGO_DEBUG', False, cast=bool)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
+    'https://void-delta-tidal.ngrok-free.dev',
+]
+if ngrok_http := env('DJANGO_CSRF_NGROK_HTTP'):
+    CSRF_TRUSTED_ORIGINS.extend(ngrok_http.split(','))
 
 
 # Application definition
@@ -37,17 +75,18 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Third-party
+    'axes',
     # Custom apps
     'productos',
-    'recetas',
     'inventario',
-    'ordenes',
     'ventas',
     'reportes',
     'usuarios',
 ]
 
 MIDDLEWARE = [
+    'axes.middleware.AxesMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -82,11 +121,36 @@ WSGI_APPLICATION = 'Inventory_Sales.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': env('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': env('DB_NAME', 'inventory_sales'),
+        'USER': env('DB_USER', 'postgres'),
+        'PASSWORD': env('DB_PASSWORD', 'postgres'),
+        'HOST': env('DB_HOST', 'localhost'),
+        'PORT': env('DB_PORT', '5432'),
     }
 }
 
+# Authentication settings
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/accounts/login/'
+
+# Brute force protection (django-axes)
+AXES_ENABLED = env('AXES_ENABLED', True, cast=bool)
+AXES_FAILURE_LIMIT = env('AXES_FAILURE_LIMIT', 5, cast=int)
+AXES_COOLOFF_TIME = env('AXES_COOLOFF_TIME', 1)  # hours
+AXES_LOCKOUT_TEMPLATE = None  # Uses default login with error
+AXES_RESET_ON_SUCCESS = True
+AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Session security
+SESSION_COOKIE_AGE = env('SESSION_COOKIE_AGE', 3600, cast=int)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -97,6 +161,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -110,9 +175,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'es-es'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Caracas'
 
 USE_I18N = True
 
@@ -129,11 +194,75 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# File upload limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = env('DATA_UPLOAD_MAX_MEMORY_SIZE', 5 * 1024 * 1024, cast=int)  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = DATA_UPLOAD_MAX_MEMORY_SIZE
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Internationalization
-LANGUAGE_CODE = 'es-es'
-TIME_ZONE = 'America/Caracas'
-USE_I18N = True
-USE_TZ = True
+
+# Security settings (production-ready, enabled via env)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', False, cast=bool)
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', False, cast=bool)
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', False, cast=bool)
+SESSION_COOKIE_HTTPONLY = env('SESSION_COOKIE_HTTPONLY', True, cast=bool)
+CSRF_COOKIE_HTTPONLY = env('CSRF_COOKIE_HTTPONLY', True, cast=bool)
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS', 0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env('SECURE_HSTS_INCLUDE_SUBDOMAINS', False, cast=bool)
+SECURE_HSTS_PRELOAD = env('SECURE_HSTS_PRELOAD', False, cast=bool)
+X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Content Security Policy (basic, opt-in via env)
+CONTENT_SECURITY_POLICY = env('CONTENT_SECURITY_POLICY', None)
+if CONTENT_SECURITY_POLICY:
+    # Use django-csp or middleware; here we set a simple header via middleware
+    pass
+
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'ventas': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'inventario': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
+}
