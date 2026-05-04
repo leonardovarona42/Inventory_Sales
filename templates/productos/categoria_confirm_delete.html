@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Eliminar Categoria{% endblock %}
+{% block page_title %}Eliminar Categoria{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm overflow-hidden">
+        <div class="p-6 text-center">
+            <div class="w-16 h-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-trash-alt text-red-600 dark:text-red-400 text-2xl"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-2">Eliminar Categoria</h3>
+            <p class="text-gray-500 dark:text-gray-400 text-sm">
+                ¿Estas seguro de que deseas eliminar la categoria <strong class="text-gray-900 dark:text-white">"{{ object.nombre }}"</strong>?
+            </p>
+            {% if object.productos.exists %}
+            <div class="mt-3 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                <p class="text-xs text-yellow-700 dark:text-yellow-300">
+                    <i class="fas fa-exclamation-triangle mr-1"></i>
+                    Esta categoria tiene <strong>{{ object.productos.count }}</strong> producto(s) asociado(s).
+                </p>
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="post" class="px-6 py-4 bg-gray-50 dark:bg-gray-800/50 border-t border-gray-100 dark:border-gray-700 flex justify-end gap-3">
+            {% csrf_token %}
+            <a href="{% url 'categoria_list' %}" class="px-5 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium">
+                Cancelar
+            </a>
+            <button type="submit" class="px-6 py-2.5 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-medium flex items-center gap-2">
+                <i class="fas fa-trash"></i>
+                <span>Eliminar</span>
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -5,9 +5,57 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q, F
 from .models import Proveedor, Producto, Categoria
-from .forms import ProveedorForm, ProductoForm
+from .forms import ProveedorForm, ProductoForm, CategoriaForm
 from inventario.models import MovimientoStock
 from utils import IsAdminUser
+
+
+class CategoriaListView(LoginRequiredMixin, IsAdminUser, ListView):
+    model = Categoria
+    template_name = 'productos/categoria_list.html'
+    context_object_name = 'categorias'
+    paginate_by = 20
+
+    def get_queryset(self):
+        return Categoria.objects.select_related('padre').order_by('padre__nombre', 'nombre')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['total'] = Categoria.objects.count()
+        context['activas'] = Categoria.objects.filter(activa=True).count()
+        return context
+
+
+class CategoriaCreateView(LoginRequiredMixin, IsAdminUser, CreateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = 'productos/categoria_form.html'
+    success_url = reverse_lazy('categoria_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Categoria creada exitosamente')
+        return super().form_valid(form)
+
+
+class CategoriaUpdateView(LoginRequiredMixin, IsAdminUser, UpdateView):
+    model = Categoria
+    form_class = CategoriaForm
+    template_name = 'productos/categoria_form.html'
+    success_url = reverse_lazy('categoria_list')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Categoria actualizada exitosamente')
+        return super().form_valid(form)
+
+
+class CategoriaDeleteView(LoginRequiredMixin, IsAdminUser, DeleteView):
+    model = Categoria
+    template_name = 'productos/categoria_confirm_delete.html'
+    success_url = reverse_lazy('categoria_list')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, 'Categoria eliminada exitosamente')
+        return super().delete(request, *args, **kwargs)
 
 
 class ProveedorListView(LoginRequiredMixin, IsAdminUser, ListView):

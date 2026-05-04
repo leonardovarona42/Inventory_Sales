@@ -91,6 +91,9 @@
                 <a href="{% url 'producto_list' %}" class="sidebar-link {% if 'producto' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-boxes-stacked w-5 text-center"></i><span>Productos</span>
                 </a>
+                <a href="{% url 'categoria_list' %}" class="sidebar-link {% if 'categoria' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-layer-group w-5 text-center"></i><span>Categorias</span>
+                </a>
                 <a href="{% url 'movimiento_list' %}" class="sidebar-link {% if 'movimiento' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-truck-ramp-box w-5 text-center"></i><span>Movimientos</span>
                 </a>

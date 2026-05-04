@@ -2,6 +2,10 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('categorias/', views.CategoriaListView.as_view(), name='categoria_list'),
+    path('categorias/create/', views.CategoriaCreateView.as_view(), name='categoria_create'),
+    path('categorias/<int:pk>/update/', views.CategoriaUpdateView.as_view(), name='categoria_update'),
+    path('categorias/<int:pk>/delete/', views.CategoriaDeleteView.as_view(), name='categoria_delete'),
     path('proveedores/', views.ProveedorListView.as_view(), name='proveedor_list'),
     path('proveedores/create/', views.ProveedorCreateView.as_view(), name='proveedor_create'),
     path('proveedores/<int:pk>/update/', views.ProveedorUpdateView.as_view(), name='proveedor_update'),
