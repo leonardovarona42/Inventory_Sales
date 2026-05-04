@@ -34,7 +34,7 @@ def env(key, default=None, cast=None):
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9')
+SECRET_KEY = env('DJANGO_SECRET_KEY', 'yd(+ao#n92#5j&laz7+8g+natqdt*#%wij(m^3fi4zw)97twyb')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DJANGO_DEBUG', True, cast=bool)
