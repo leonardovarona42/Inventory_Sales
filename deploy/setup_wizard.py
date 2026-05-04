@@ -813,12 +813,28 @@ except Exception as e:
                 self._copy_project(Path(__file__).parent.parent, install_dir)
 
             self._log("[3/8] Creando entorno virtual...")
+
+            # Remove existing venv to avoid corrupted state on reinstall
+            if os.path.exists(venv_path):
+                self._log("  Eliminando entorno virtual existente...")
+                try:
+                    shutil.rmtree(venv_path)
+                except PermissionError:
+                    # Try killing python processes and retry
+                    subprocess.run('taskkill /F /IM python.exe /FI "STATUS eq UNKNOWN"', shell=True, capture_output=True)
+                    import time
+                    time.sleep(2)
+                    try:
+                        shutil.rmtree(venv_path)
+                    except Exception:
+                        self._log("  ⚠️ No se pudo eliminar venv existente, se intentara reutilizar")
+
             python_path = get_python_exe()
             if python_path:
                 subprocess.run([python_path, "-m", "venv", venv_path],
                               check=True, capture_output=True)
             else:
-                subprocess.run(['py', '-3', '-m', 'venv', venv_path],
+                subprocess.run(['py', '-3', "-m", "venv", venv_path],
                               check=True, capture_output=True)
 
             python_exe = os.path.join(venv_path, "Scripts", "python.exe")
@@ -877,6 +893,24 @@ except Exception as e:
                                      text="Finalizar", bg=COLORS["error"])
                 self.step = 6
                 return
+
+            # Verify psycopg installation works
+            self._log("  Verificando conexion a PostgreSQL...")
+            verify_result = subprocess.run(
+                [python_exe, "-c", "import psycopg; print('psycopg OK')"],
+                capture_output=True, text=True, timeout=10
+            )
+            if verify_result.returncode != 0:
+                self._log(f"  ⚠️ psycopg no funciona: {verify_result.stderr.strip()[:150]}")
+                self._log("  Reintentando instalacion de psycopg...")
+                fix_cmd = [pip_exe, "install", "--no-index", "--find-links", pip_dir, "--force-reinstall", "psycopg", "psycopg-binary"]
+                fix_result = subprocess.run(fix_cmd, capture_output=True, text=True, timeout=120)
+                if fix_result.returncode == 0:
+                    self._log("  ✅ psycopg reinstalado correctamente")
+                else:
+                    self._log(f"  ❌ No se pudo reparar psycopg: {fix_result.stderr.strip()[:150]}")
+            else:
+                self._log("  ✅ psycopg verificado")
 
             self._log("[5/8] Configurando .env...")
             self._create_env_file(project_dir)
