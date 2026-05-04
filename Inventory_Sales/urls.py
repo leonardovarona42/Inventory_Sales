@@ -2,9 +2,10 @@
 URL configuration for Inventory_Sales project.
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve as static_serve
 from django.db.models import Sum, F
 from django.utils import timezone
 from django.shortcuts import render
@@ -39,8 +40,12 @@ urlpatterns = [
     path('', include('licencias.urls')),
 ]
 
-# Always serve media and static files for offline standalone installation
-# WhiteNoise handles static files, but media (user uploads) needs explicit serving
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+# Serve media files ALWAYS (not just when DEBUG=True).
+# The static() helper returns [] when DEBUG=False, so we must use
+# re_path + static_serve directly for offline standalone installation.
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': settings.MEDIA_ROOT}),
+]
+
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
