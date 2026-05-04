@@ -22,11 +22,15 @@ def obtener_licencia_activa() -> Licencia | None:
 def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
     """
     Activa una nueva licencia.
+    Permite reactivacion si el cliente coincide con una licencia previa desactivada
+    (caso de reinstalacion legitima).
+
     Verificacion de seguridad:
     1. Firma HMAC
-    2. Nonce unico (previene reuso)
-    3. Vencimiento valido
-    4. Hash unico (previene duplicados exactos)
+    2. Nonce unico - rechaza si esta activa en otro sistema
+    3. Si nonce existe pero inactiva y datos coinciden → reactivacion permitida
+    4. Vencimiento valido
+    5. Hash unico
     Retorna: (exito, mensaje, licencia)
     """
     # 1. Verificar firma HMAC
@@ -34,18 +38,38 @@ def activar_licencia(licencia_texto: str) -> tuple[bool, str, Licencia | None]:
     if payload is None:
         return False, "Licencia invalida - firma incorrecta", None
 
-    # 2. Verificar que no esté ya usada (nonce único)
+    cliente_nombre = payload.get("cliente", "").strip().lower()
+    emisor_ci = payload.get("ci", "").strip()
+
+    # 2. Verificar nonce unico
     nonce = payload.get("nonce")
     existente_nonce = Licencia.objects.filter(nonce=nonce).first()
     if existente_nonce:
         if existente_nonce.activa:
-            return False, "Esta licencia ya esta activa", existente_nonce
-        return False, "Esta licencia ya fue usada y desactivada anteriormente", None
+            # Licencia activa en otro sistema → posible compartimiento
+            return False, "Esta licencia ya esta activa en otro sistema", existente_nonce
+        # Licencia inactiva → verificar si es reactivacion legitima
+        # (mismo cliente y emisor CI coinciden = reinstalacion legitima)
+        cliente_anterior = existente_nonce.cliente_nombre.strip().lower()
+        emisor_anterior = existente_nonce.emisor_ci.strip()
+        if cliente_nombre == cliente_anterior and emisor_ci == emisor_anterior:
+            # Reactivacion legitima - continuar, se desactivara la anterior y se creara nueva
+            logger.info("Reactivacion legitima detectada: %s (reinstalacion)", cliente_nombre)
+        else:
+            # Datos no coinciden → posible compartimiento de licencia
+            return False, "Esta licencia ya fue usada por otro cliente y no puede reactivarse", None
 
-    # 3. Verificar que el hash no exista (previene re-registro)
+    # 3. Verificar hash unico
     lic_hash = hash_licencia(licencia_texto)
-    if Licencia.objects.filter(clave_hash=lic_hash).exists():
-        return False, "Esta licencia ya esta registrada en el sistema", None
+    existente_hash = Licencia.objects.filter(clave_hash=lic_hash).first()
+    if existente_hash:
+        if existente_hash.activa:
+            return False, "Esta licencia ya esta activa", existente_hash
+        cliente_anterior = existente_hash.cliente_nombre.strip().lower()
+        emisor_anterior = existente_hash.emisor_ci.strip()
+        if cliente_nombre != cliente_anterior or emisor_ci != emisor_anterior:
+            return False, "Esta licencia ya fue usada por otro cliente", None
+        # Mismo cliente, permitir reactivacion
 
     # 4. Verificar vencimiento
     es_valida, mensaje = verificar_vencimiento(payload)
