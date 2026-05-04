@@ -596,19 +596,166 @@ except Exception as e:
     def _step_license(self):
         self._create_card_section(self.content_frame,
                                   "Activacion de Licencia",
-                                  "Introduzca la clave proporcionada por su proveedor.")
+                                  "Verifique el estado de la licencia en el sistema.")
 
         frame = tk.Frame(self.content_frame, bg=COLORS["surface"])
         frame.pack(fill=tk.X, padx=40, pady=5)
 
+        # Detectar licencia existente en la BD
+        self.license_state = self._detect_existing_license()
+
+        if self.license_state == "valid":
+            self._render_license_valid(frame)
+        elif self.license_state == "invalid":
+            self._render_license_invalid(frame)
+        else:
+            self._render_license_new(frame)
+
+    def _detect_existing_license(self):
+        """Verifica si ya existe una licencia en la BD."""
+        db_host = self.config.get("db_host", "localhost")
+        db_port = self.config.get("db_port", "5432")
+        db_name = self.config.get("db_name", "inventory_sales")
+        db_user = self.config.get("db_user", "postgres")
+        db_password = self.config.get("db_password", "")
+
+        if not db_host or not db_name:
+            return "new"
+
+        try:
+            import psycopg
+            conn = psycopg.connect(
+                host=db_host, port=db_port, dbname=db_name,
+                user=db_user, password=db_password,
+                connect_timeout=5
+            )
+            cur = conn.cursor()
+
+            # Verificar si la tabla de licencias existe
+            cur.execute("""
+                SELECT EXISTS (
+                    SELECT FROM information_schema.tables
+                    WHERE table_name = 'licencias_licencia'
+                )
+            """)
+            table_exists = cur.fetchone()[0]
+
+            if not table_exists:
+                conn.close()
+                return "new"
+
+            # Verificar si hay licencia activa
+            cur.execute("""
+                SELECT activa, fecha_vencimiento, cliente_nombre, tipo
+                FROM licencias_licencia
+                WHERE activa = true
+                LIMIT 1
+            """)
+            row = cur.fetchone()
+            conn.close()
+
+            if row:
+                activa, vencimiento, cliente, tipo = row
+                if activa and (vencimiento is None or (hasattr(vencimiento, '__gt__') and vencimiento > __import__('datetime').datetime.now(__import__('datetime').timezone.utc))):
+                    return "valid"
+                return "invalid"
+            else:
+                return "new"
+
+        except Exception:
+            return "new"
+
+    def _render_license_valid(self, frame):
+        """Licencia valida detectada - preguntar si renovar."""
+        info = tk.Label(frame, text="✅ Se detecto una licencia valida en la base de datos.",
+                        bg=COLORS["success_bg"], fg=COLORS["success"],
+                        font=("Segoe UI", 10, "bold"), bd=1, relief=tk.SOLID,
+                        padx=15, pady=10)
+        info.pack(fill=tk.X, pady=10)
+
+        self.license_action_var = tk.StringVar(value="keep")
+
+        tk.Label(frame, text="¿Que desea hacer?",
+                 bg=COLORS["surface"], font=("Segoe UI", 10, "bold"),
+                 fg=COLORS["text_secondary"]).pack(anchor=tk.W, pady=(15, 5))
+
+        ttk.Radiobutton(frame, text="Mantener la licencia actual",
+                        variable=self.license_action_var, value="keep").pack(anchor=tk.W, pady=2)
+        ttk.Radiobutton(frame, text="Renovar con una nueva clave",
+                        variable=self.license_action_var, value="renew").pack(anchor=tk.W, pady=2)
+
+        self.renew_frame = tk.Frame(frame, bg=COLORS["surface"])
+        self.renew_frame.pack(fill=tk.X, pady=5)
+        self.renew_frame.pack_forget()
+
+        tk.Label(self.renew_frame, text="Nueva clave de licencia:",
+                 bg=COLORS["surface"], font=("Segoe UI", 9)).pack(anchor=tk.W, pady=(5, 0))
+        self.license_text = tk.Text(self.renew_frame, width=50, height=4,
+                                     font=("Consolas", 10), bd=1, relief=tk.SOLID,
+                                     bg=COLORS["surface_alt"], fg=COLORS["text_primary"])
+        self.license_text.pack(fill=tk.X, pady=5)
+        self.license_text.insert("1.0", "LIC-")
+
+        # Toggle renew frame visibility
+        def toggle_renew():
+            if self.license_action_var.get() == "renew":
+                self.renew_frame.pack(fill=tk.X, pady=5)
+                self.license_text.config(state=tk.NORMAL)
+            else:
+                self.renew_frame.pack_forget()
+
+        self.license_action_var.trace_add("write", lambda *args: toggle_renew())
+
+    def _render_license_invalid(self, frame):
+        """Licencia invalida/vencida detectada - pedir revalidacion o activar despues."""
+        info = tk.Label(frame, text="⚠️ Se detecto una licencia vencida o invalida en la base de datos.",
+                        bg=COLORS["warning_bg"], fg=COLORS["warning"],
+                        font=("Segoe UI", 10, "bold"), bd=1, relief=tk.SOLID,
+                        padx=15, pady=10)
+        info.pack(fill=tk.X, pady=10)
+
+        self.license_action_var = tk.StringVar(value="renew")
+
+        tk.Label(frame, text="¿Que desea hacer?",
+                 bg=COLORS["surface"], font=("Segoe UI", 10, "bold"),
+                 fg=COLORS["text_secondary"]).pack(anchor=tk.W, pady=(15, 5))
+
+        ttk.Radiobutton(frame, text="Reactivar con una nueva clave",
+                        variable=self.license_action_var, value="renew").pack(anchor=tk.W, pady=2)
+        ttk.Radiobutton(frame, text="Activar licencia despues (sistema bloqueado)",
+                        variable=self.license_action_var, value="later").pack(anchor=tk.W, pady=2)
+
+        self.renew_frame = tk.Frame(frame, bg=COLORS["surface"])
+        self.renew_frame.pack(fill=tk.X, pady=5)
+
+        tk.Label(self.renew_frame, text="Nueva clave de licencia:",
+                 bg=COLORS["surface"], font=("Segoe UI", 9)).pack(anchor=tk.W, pady=(5, 0))
+        self.license_text = tk.Text(self.renew_frame, width=50, height=4,
+                                     font=("Consolas", 10), bd=1, relief=tk.SOLID,
+                                     bg=COLORS["surface_alt"], fg=COLORS["text_primary"])
+        self.license_text.pack(fill=tk.X, pady=5)
+        self.license_text.insert("1.0", "LIC-")
+
+        # Toggle renew frame visibility
+        def toggle_renew():
+            if self.license_action_var.get() == "later":
+                self.renew_frame.pack_forget()
+            else:
+                self.renew_frame.pack(fill=tk.X, pady=5)
+
+        self.license_action_var.trace_add("write", lambda *args: toggle_renew())
+
+    def _render_license_new(self, frame):
+        """No hay licencia previa - flujo normal."""
         self.license_text = tk.Text(frame, width=50, height=4,
-                                    font=("Consolas", 10), bd=1, relief=tk.SOLID,
-                                    bg=COLORS["surface_alt"], fg=COLORS["text_primary"])
+                                     font=("Consolas", 10), bd=1, relief=tk.SOLID,
+                                     bg=COLORS["surface_alt"], fg=COLORS["text_primary"])
         self.license_text.pack(fill=tk.X, pady=10)
         self.license_text.insert("1.0", "LIC-")
 
         # Skip option
         self.skip_var = tk.BooleanVar(value=False)
+        self.license_action_var = tk.StringVar(value="new")
         tk.Checkbutton(frame, text="Activar licencia despues (el sistema se bloqueara)",
                        variable=self.skip_var, bg=COLORS["surface"],
                        font=("Segoe UI", 10), fg=COLORS["text_secondary"],
@@ -1106,14 +1253,31 @@ $Shortcut2.Save()
             self.config["csrf_origins"] = self.origins_var.get()
 
         if self.step == 4:
-            if not self.skip_var.get():
+            action = getattr(self, "license_action_var", None)
+            action_val = action.get() if action else "new"
+
+            if action_val == "keep":
+                self.config["license_key"] = ""
+                self.config["license_later"] = False
+            elif action_val == "renew":
                 key = self.license_text.get("1.0", tk.END).strip()
                 if not key or key == "LIC-":
                     messagebox.showerror("Error", "Introduzca una clave de licencia valida.")
                     return
                 self.config["license_key"] = key
-            else:
+                self.config["license_later"] = False
+            elif action_val == "later":
+                self.config["license_key"] = ""
                 self.config["license_later"] = True
+            else:
+                if not self.skip_var.get():
+                    key = self.license_text.get("1.0", tk.END).strip()
+                    if not key or key == "LIC-":
+                        messagebox.showerror("Error", "Introduzca una clave de licencia valida.")
+                        return
+                    self.config["license_key"] = key
+                else:
+                    self.config["license_later"] = True
 
         self.step += 1
         self.btn_back.config(state=tk.NORMAL)
