@@ -6,70 +6,70 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
-                <div><p class="text-sm text-gray-500">Total Ventas</p><p class="text-3xl font-bold text-gray-900 mt-1">{{ total_ventas }}</p></div>
-                <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-receipt text-blue-600 text-xl"></i></div>
+                <div><p class="text-sm text-gray-500 dark:text-gray-400">Total Ventas</p><p class="text-3xl font-bold text-gray-900 dark:text-white mt-1">{{ total_ventas }}</p></div>
+                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-receipt text-blue-600 dark:text-blue-400 text-xl"></i></div>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
-                <div><p class="text-sm text-gray-500">Ingresos Totales</p><p class="text-3xl font-bold text-green-600 mt-1">${{ ingresos_totales|floatformat:2 }}</p></div>
-                <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-dollar-sign text-green-600 text-xl"></i></div>
+                <div><p class="text-sm text-gray-500 dark:text-gray-400">Ingresos Totales</p><p class="text-3xl font-bold text-green-600 dark:text-green-400 mt-1">${{ ingresos_totales|floatformat:2 }}</p></div>
+                <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-dollar-sign text-green-600 dark:text-green-400 text-xl"></i></div>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
-                <div><p class="text-sm text-gray-500">Productos Activos</p><p class="text-3xl font-bold text-orange-600 mt-1">{{ productos_activos }}</p></div>
-                <div class="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center"><i class="fas fa-boxes-stacked text-orange-600 text-xl"></i></div>
+                <div><p class="text-sm text-gray-500 dark:text-gray-400">Productos Activos</p><p class="text-3xl font-bold text-orange-600 dark:text-orange-400 mt-1">{{ productos_activos }}</p></div>
+                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-boxes-stacked text-orange-600 dark:text-orange-400 text-xl"></i></div>
             </div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex items-center justify-between">
-                <div><p class="text-sm text-gray-500">Stock Bajo</p><p class="text-3xl font-bold text-red-600 mt-1">{{ productos_bajo_stock }}</p></div>
-                <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-600 text-xl"></i></div>
+                <div><p class="text-sm text-gray-500 dark:text-gray-400">Stock Bajo</p><p class="text-3xl font-bold text-red-600 dark:text-red-400 mt-1">{{ productos_bajo_stock }}</p></div>
+<div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-600 dark:text-red-400 text-xl"></i></div>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Ventas Ultimos 7 Dias</h3>
-            <canvas id="ventasChart" height="250"></canvas>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ventas Ultimos 7 Dias</h3>
+            <div class="relative h-64"><canvas id="ventasChart"></canvas></div>
         </div>
-        <div class="bg-white rounded-xl border border-gray-200 p-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Top 10 Productos Mas Vendidos</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6">
+            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top 10 Productos Mas Vendidos</h3>
             <div class="space-y-3">
                 {% for prod in top_productos %}
                 <div class="flex items-center gap-3">
-                    <span class="w-6 text-sm text-gray-400 font-medium">{{ forloop.counter }}</span>
+                    <span class="w-6 text-sm text-gray-400 dark:text-gray-500 font-medium">{{ forloop.counter }}</span>
                     <div class="flex-1">
                         <div class="flex items-center justify-between mb-1">
-                            <span class="text-sm font-medium text-gray-700">{{ prod.id_producto__nombre }}</span>
-                            <span class="text-sm font-semibold text-gray-900">{{ prod.total }} uds</span>
+                            <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ prod.id_producto__nombre }}</span>
+                            <span class="text-sm font-semibold text-gray-900 dark:text-white">{{ prod.total }} uds</span>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-2">
-                            <div class="bg-primary-600 h-2 rounded-full" style="width: {% widthratio prod.total top_productos.0.total 100 %}%"></div>
+                        <div class="w-full bg-gray-100 dark:bg-gray-700 rounded-full h-2">
+                            <div class="bg-primary-600 dark:bg-primary-400 h-2 rounded-full" style="width: {% widthratio prod.total top_productos.0.total 100 %}%"></div>
                         </div>
                     </div>
                 </div>
                 {% empty %}
-                <p class="text-center text-gray-500 py-4">No hay datos de ventas aun</p>
+                <p class="text-center text-gray-500 dark:text-gray-400 py-4">No hay datos de ventas aun</p>
                 {% endfor %}
             </div>
         </div>
     </div>
 
     {% if ventas_por_cajero %}
-    <div class="bg-white rounded-xl border border-gray-200 p-6 mb-8">
-        <h3 class="text-lg font-semibold text-gray-900 mb-4">Ventas por Cajero</h3>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Ventas por Cajero</h3>
         <table class="w-full">
-            <thead class="text-xs text-gray-500 uppercase border-b">
+            <thead class="text-xs text-gray-500 dark:text-gray-400 uppercase border-b dark:border-gray-700">
                 <tr><th class="py-2 text-left">Cajero</th><th class="py-2 text-center">Ventas</th><th class="py-2 text-right">Ingresos</th></tr>
             </thead>
-            <tbody class="divide-y divide-gray-50">
+            <tbody class="divide-y divide-gray-50 dark:divide-gray-700">
                 {% for v in ventas_por_cajero %}
-                <tr><td class="py-3 font-medium">{{ v.cajero|default:"N/A" }}</td><td class="py-3 text-center">{{ v.total }}</td><td class="py-3 text-right font-semibold">${{ v.ingresos|floatformat:2 }}</td></tr>
+                <tr class="text-gray-900 dark:text-white"><td class="py-3 font-medium">{{ v.cajero|default:"N/A" }}</td><td class="py-3 text-center">{{ v.total }}</td><td class="py-3 text-right font-semibold">${{ v.ingresos|floatformat:2 }}</td></tr>
                 {% endfor %}
             </tbody>
         </table>
@@ -77,17 +77,17 @@
     {% endif %}
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <a href="{% url 'venta_list' %}" class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center"><i class="fas fa-list text-blue-600 text-xl"></i></div>
-            <div><h4 class="font-semibold text-gray-900">Historial de Ventas</h4><p class="text-sm text-gray-500">Ver todas las transacciones</p></div>
+        <a href="{% url 'venta_list' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-list text-blue-600 dark:text-blue-400 text-xl"></i></div>
+            <div><h4 class="font-semibold text-gray-900 dark:text-white">Historial de Ventas</h4><p class="text-sm text-gray-500 dark:text-gray-400">Ver todas las transacciones</p></div>
         </a>
-        <a href="{% url 'low_stock' %}" class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div class="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-600 text-xl"></i></div>
-            <div><h4 class="font-semibold text-gray-900">Alertas de Stock</h4><p class="text-sm text-gray-500">Productos con stock bajo</p></div>
+        <a href="{% url 'low_stock' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-4">
+            <div class="w-12 h-12 bg-red-100 dark:bg-red-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-triangle-exclamation text-red-600 dark:text-red-400 text-xl"></i></div>
+            <div><h4 class="font-semibold text-gray-900 dark:text-white">Alertas de Stock</h4><p class="text-sm text-gray-500 dark:text-gray-400">Productos con stock bajo</p></div>
         </a>
-        <a href="{% url 'pos' %}" class="bg-white rounded-xl border border-gray-200 p-6 hover:shadow-md transition-shadow flex items-center gap-4">
-            <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center"><i class="fas fa-cash-register text-green-600 text-xl"></i></div>
-            <div><h4 class="font-semibold text-gray-900">Punto de Venta</h4><p class="text-sm text-gray-500">Registrar nueva venta</p></div>
+        <a href="{% url 'pos' %}" class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-6 hover:shadow-md transition-shadow hover:bg-gray-50 dark:hover:bg-gray-800/50 flex items-center gap-4">
+            <div class="w-12 h-12 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center"><i class="fas fa-cash-register text-green-600 dark:text-green-400 text-xl"></i></div>
+            <div><h4 class="font-semibold text-gray-900 dark:text-white">Punto de Venta</h4><p class="text-sm text-gray-500 dark:text-gray-400">Registrar nueva venta</p></div>
         </a>
     </div>
 </div>

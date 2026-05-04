@@ -1,7 +1,7 @@
 from django import forms
 from .models import Proveedor, Producto, Categoria
 
-INPUT = 'w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white text-gray-900'
+INPUT = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
 
 
 class ProveedorForm(forms.ModelForm):
@@ -25,11 +25,11 @@ class ProductoForm(forms.ModelForm):
             'unidad_medida': forms.Select(attrs={'class': INPUT}),
             'stock_actual': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
             'stock_minimo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'precio_costo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'precio_venta': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
-            'imagen': forms.ClearableFileInput(attrs={'class': INPUT, 'accept': 'image/*'}),
+            'precio_costo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'placeholder': '0.00'}),
+            'precio_venta': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01', 'placeholder': '0.00'}),
+            'imagen': forms.ClearableFileInput(attrs={'class': 'hidden', 'accept': 'image/*'}),
             'proveedor': forms.Select(attrs={'class': INPUT}),
-            'categorias': forms.SelectMultiple(attrs={'class': INPUT}),
+            'categorias': forms.CheckboxSelectMultiple(attrs={'class': 'hidden'}),
         }
 
     def __init__(self, *args, **kwargs):

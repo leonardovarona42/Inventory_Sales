@@ -16,17 +16,38 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Environment variables helper
+def env(key, default=None, cast=None):
+    value = os.environ.get(key, default)
+    if value is None:
+        return None
+    if cast == bool:
+        if isinstance(value, bool):
+            return value
+        return str(value).lower() in ('true', '1', 'yes')
+    if cast == int:
+        return int(value)
+    return value
+
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9'
+SECRET_KEY = env('DJANGO_SECRET_KEY', 'yd(+ao#n92#5j&laz7+8g+natqdt*#%wij(m^3fi4zw)97twyb')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env('DJANGO_DEBUG', True, cast=bool)
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1','void-delta-tidal.ngrok-free.dev']
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,void-delta-tidal.ngrok-free.dev').split(',')
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.ngrok-free.app',
+    'https://*.ngrok-free.dev',
+    'https://void-delta-tidal.ngrok-free.dev',
+]
+if ngrok_http := env('DJANGO_CSRF_NGROK_HTTP'):
+    CSRF_TRUSTED_ORIGINS.extend(ngrok_http.split(','))
 
 
 # Application definition
@@ -38,6 +59,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # Third-party
+    'axes',
     # Custom apps
     'productos',
     'inventario',
@@ -47,6 +70,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'axes.middleware.AxesMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -81,12 +105,12 @@ WSGI_APPLICATION = 'Inventory_Sales.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'inventory_sales',
-        'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': 'localhost',
-        'PORT': '5432',
+        'ENGINE': env('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': env('DB_NAME', 'inventory_sales'),
+        'USER': env('DB_USER', 'postgres'),
+        'PASSWORD': env('DB_PASSWORD', 'postgres'),
+        'HOST': env('DB_HOST', 'localhost'),
+        'PORT': env('DB_PORT', '5432'),
     }
 }
 
@@ -94,6 +118,23 @@ DATABASES = {
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 LOGIN_URL = '/accounts/login/'
+
+# Brute force protection (django-axes)
+AXES_ENABLED = env('AXES_ENABLED', True, cast=bool)
+AXES_FAILURE_LIMIT = env('AXES_FAILURE_LIMIT', 5, cast=int)
+AXES_COOLOFF_TIME = env('AXES_COOLOFF_TIME', 1)  # hours
+AXES_LOCKOUT_TEMPLATE = None  # Uses default login with error
+AXES_RESET_ON_SUCCESS = True
+AXES_HANDLER = 'axes.handlers.database.AxesDatabaseHandler'
+
+AUTHENTICATION_BACKENDS = [
+    'axes.backends.AxesStandaloneBackend',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
+# Session security
+SESSION_COOKIE_AGE = env('SESSION_COOKIE_AGE', 3600, cast=int)
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -104,6 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -114,13 +156,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 
-
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.ngrok-free.app',
-    'https://*.ngrok-free.dev',
-    'http://*.ngrok-free.app', 
-    'http://*.ngrok-free.dev',
-]
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -143,12 +178,67 @@ STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
+# File upload limits
+DATA_UPLOAD_MAX_MEMORY_SIZE = env('DATA_UPLOAD_MAX_MEMORY_SIZE', 5 * 1024 * 1024, cast=int)  # 5MB
+FILE_UPLOAD_MAX_MEMORY_SIZE = DATA_UPLOAD_MAX_MEMORY_SIZE
+
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# Roles del sistema
-ROLES = {
-    'Superadmin': 'Dueño del negocio - acceso total + reportes',
-    'Administrador': 'Gestion de inventario, productos y usuarios',
-    'Cajero': 'Punto de venta y registro de ventas',
+
+# Security settings (production-ready, enabled via env)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', False, cast=bool)
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', False, cast=bool)
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', False, cast=bool)
+SECURE_BROWSER_XSS_FILTER = True
+SECURE_CONTENT_TYPE_NOSNIFF = True
+SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS', 0, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = env('SECURE_HSTS_INCLUDE_SUBDOMAINS', False, cast=bool)
+SECURE_HSTS_PRELOAD = env('SECURE_HSTS_PRELOAD', False, cast=bool)
+X_FRAME_OPTIONS = 'DENY'
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+
+# Logging configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '[{asctime}] {levelname} {name} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose',
+        },
+        'file': {
+            'class': 'logging.FileHandler',
+            'filename': BASE_DIR / 'django.log',
+            'formatter': 'verbose',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console', 'file'] if not DEBUG else ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+        'ventas': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+        'inventario': {
+            'handlers': ['console', 'file'],
+            'level': 'WARNING',
+            'propagate': False,
+        },
+    },
 }

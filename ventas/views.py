@@ -1,9 +1,11 @@
 import json
+import logging
 from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.core.exceptions import ValidationError
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_POST
@@ -13,6 +15,8 @@ from productos.models import Producto
 
 from .models import Venta
 from .services import procesar_venta, cancelar_venta
+
+logger = logging.getLogger(__name__)
 
 
 def _usuario_puede_vender(user):
@@ -30,16 +34,22 @@ class VentaListView(LoginRequiredMixin, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Venta.objects.all()
+        qs = Venta.objects.select_related('cajero_user').all()
         if not _es_admin(self.request.user):
             qs = qs.filter(cajero=self.request.user.username)
         return qs.order_by('-fecha_venta')
 
 
-class VentaDetailView(LoginRequiredMixin, DetailView):
+class VentaDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Venta
     template_name = 'ventas/venta_detail.html'
     context_object_name = 'venta'
+
+    def test_func(self):
+        venta = self.get_object()
+        if _es_admin(self.request.user):
+            return True
+        return self.request.user.username == venta.cajero
 
 
 class POSView(LoginRequiredMixin, UserPassesTestMixin, ListView):
@@ -64,14 +74,26 @@ class POSView(LoginRequiredMixin, UserPassesTestMixin, ListView):
         return context
 
 
+def _parse_int(value, default=None):
+    """Safe integer parsing for AJAX endpoints."""
+    try:
+        return int(value)
+    except (ValueError, TypeError):
+        return default
+
+
 @login_required
 @require_POST
 def ajax_agregar_carrito(request):
     if not _usuario_puede_vender(request.user):
         return JsonResponse({"success": False, "error": "No autorizado"}, status=403)
 
-    producto_id = int(request.POST.get("producto_id"))
-    cantidad = max(1, int(request.POST.get("cantidad", 1)))
+    producto_id = _parse_int(request.POST.get("producto_id"))
+    if producto_id is None:
+        return JsonResponse({"success": False, "error": "ID de producto invalido"}, status=400)
+
+    cantidad = _parse_int(request.POST.get("cantidad"), 1)
+    cantidad = max(1, cantidad)
     producto = get_object_or_404(Producto, id=producto_id)
 
     if producto.stock_actual <= 0:
@@ -85,7 +107,7 @@ def ajax_agregar_carrito(request):
         carrito[key] = {
             "id": producto_id,
             "nombre": producto.nombre,
-            "precio": str(producto.precio_actual or producto.precio_base or 0),
+            "precio": str(producto.precio_venta or producto.precio_costo or 0),
             "cantidad": cantidad,
             "stock": float(producto.stock_actual),
         }
@@ -135,8 +157,11 @@ def ajax_procesar_venta(request):
 
     try:
         venta = procesar_venta(metodo_pago=metodo_pago, items=items, cajero=request.user.username)
+    except ValidationError as exc:
+        return JsonResponse({"success": False, "error": exc.message if hasattr(exc, 'message') else str(exc)})
     except Exception as exc:
-        return JsonResponse({"success": False, "error": str(exc)})
+        logger.exception("Error procesando venta: %s", exc)
+        return JsonResponse({"success": False, "error": "Error interno al procesar la venta"}, status=500)
 
     request.session["carrito"] = {}
     return JsonResponse(
@@ -150,8 +175,15 @@ def ajax_cancelar_venta(request, pk):
     if not _es_admin(request.user):
         return JsonResponse({"success": False, "error": "No autorizado"}, status=403)
 
+    venta_id = _parse_int(pk)
+    if venta_id is None:
+        return JsonResponse({"success": False, "error": "ID de venta invalido"}, status=400)
+
     try:
-        cancelar_venta(venta_id=pk, motivo="Cancelada por usuario")
-        return JsonResponse({"success": True})
-    except Exception as exc:
+        cancelar_venta(venta_id=venta_id, motivo="Cancelada por usuario")
+    except ValidationError as exc:
         return JsonResponse({"success": False, "error": str(exc)})
+    except Exception as exc:
+        logger.exception("Error cancelando venta %s: %s", venta_id, exc)
+        return JsonResponse({"success": False, "error": "Error interno al cancelar la venta"}, status=500)
+    return JsonResponse({"success": True})

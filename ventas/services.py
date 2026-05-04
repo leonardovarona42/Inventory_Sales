@@ -1,10 +1,19 @@
+import logging
 from decimal import Decimal
 
 from django.db import transaction
 from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 from .models import Venta, DetalleVenta
 from inventario.models import MovimientoStock
+
+logger = logging.getLogger(__name__)
+
+
+def _generar_ticket(venta):
+    """Genera el codigo de ticket unico para una venta."""
+    return f"V-{venta.fecha_venta.strftime('%Y%m%d')}-{venta.pk:06d}"
 
 
 @transaction.atomic
@@ -13,13 +22,13 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
     Registra una venta completa dentro de una transaccion atomica.
 
     items: lista de dicts con llaves `producto` y `cantidad`.
-    
+
     Retorna: instancia de Venta
-    
+
     Lanza: ValidationError si stock insuficiente
     """
     errores_stock = []
-    
+
     for item in items:
         producto = item["producto"]
         cantidad = item["cantidad"]
@@ -27,11 +36,16 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
             errores_stock.append(
                 f"{producto.nombre}: necesario {cantidad}, disponible {producto.stock_actual}"
             )
-    
+
     if errores_stock:
         raise ValidationError(errores_stock)
-    
-    venta = Venta.objects.create(metodo_pago=metodo_pago, total_pagado=Decimal("0"), cajero=cajero, cajero_user=None)
+
+    venta = Venta.objects.create(
+        metodo_pago=metodo_pago,
+        total_pagado=Decimal("0"),
+        cajero=cajero,
+    )
+
     if cajero:
         try:
             from django.contrib.auth.models import User
@@ -39,12 +53,15 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
             venta.save(update_fields=["cajero_user"])
         except Exception:
             pass
-    
+
+    venta.codigo_ticket = _generar_ticket(venta)
+    venta.save(update_fields=["codigo_ticket"])
+
     detalles_creados = []
     total_venta = Decimal("0")
     for item in items:
         producto = item["producto"]
-        precio = producto.precio_actual or producto.precio_base or Decimal("0")
+        precio = producto.precio_venta or producto.precio_costo or Decimal("0")
         detalle = DetalleVenta.objects.create(
             venta=venta,
             id_producto=producto,
@@ -53,12 +70,10 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
         )
         detalles_creados.append(detalle)
         total_venta += detalle.cantidad * detalle.precio_unitario
-        
-        # Descontar stock directo del producto
+
         producto.stock_actual -= item["cantidad"]
         producto.save(update_fields=["stock_actual", "updated_at"])
-        
-        # Registrar movimiento
+
         MovimientoStock.objects.create(
             producto=producto,
             tipo='salida',
@@ -67,10 +82,10 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
             referencia_id=venta.id,
             notas=f"Venta #{venta.codigo_ticket}: {producto.nombre} x{item['cantidad']}"
         )
-    
+
     venta.total_pagado = total_venta
     venta.save(update_fields=["total_pagado"])
-    
+
     return venta
 
 
@@ -83,16 +98,15 @@ def cancelar_venta(venta_id, motivo=""):
         venta = Venta.objects.get(id=venta_id)
     except Venta.DoesNotExist:
         raise ValidationError("Venta no encontrada")
-    
+
     if venta.detalles.count() == 0:
         raise ValidationError("Venta sin detalles")
-    
+
     for detalle in venta.detalles.all():
         producto = detalle.id_producto
-        # Revertir stock
         producto.stock_actual += detalle.cantidad
         producto.save(update_fields=["stock_actual", "updated_at"])
-        
+
         MovimientoStock.objects.create(
             producto=producto,
             tipo='entrada',
@@ -101,6 +115,6 @@ def cancelar_venta(venta_id, motivo=""):
             referencia_id=venta.id,
             notas=f"Cancelacion Venta #{venta.codigo_ticket}: {producto.nombre}"
         )
-    
+
     venta.detalles.all().delete()
     venta.delete()

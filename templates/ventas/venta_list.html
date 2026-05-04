@@ -6,40 +6,40 @@
 {% block content %}
 <div class="max-w-6xl mx-auto">
     {% if ventas %}
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
         <table class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
+            <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Ticket</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Cajero</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Pago</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Total</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Ticket</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Cajero</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Fecha</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Pago</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Total</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700">
                 {% for venta in ventas %}
-                <tr class="hover:bg-gray-50">
+                <tr class="hover:bg-gray-50 dark:hover:bg-gray-800/50">
                     <td class="px-6 py-4">
-                        <span class="font-mono text-sm font-medium text-primary-600">{{ venta.codigo_ticket }}</span>
+                        <span class="font-mono text-sm font-medium text-primary-600 dark:text-primary-400">{{ venta.codigo_ticket }}</span>
                     </td>
-                    <td class="px-6 py-4 text-sm text-gray-700">{{ venta.cajero|default:"-" }}</td>
-                    <td class="px-6 py-4 text-sm text-gray-500">{{ venta.fecha_venta|date:"d/m/Y H:i" }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">{{ venta.cajero|default:"-" }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{{ venta.fecha_venta|date:"d/m/Y H:i" }}</td>
                     <td class="px-6 py-4">
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if venta.metodo_pago == 'efectivo' %}bg-green-100 text-green-800{% elif venta.metodo_pago == 'tarjeta' %}bg-blue-100 text-blue-800{% elif venta.metodo_pago == 'transferencia' %}bg-purple-100 text-purple-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {% if venta.metodo_pago == 'efectivo' %}bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400{% elif venta.metodo_pago == 'tarjeta' %}bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400{% elif venta.metodo_pago == 'transferencia' %}bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400{% else %}bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300{% endif %}">
                             {{ venta.get_metodo_pago_display }}
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <span class="font-semibold text-gray-900">${{ venta.total_pagado|floatformat:2 }}</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">${{ venta.total_pagado|floatformat:2 }}</span>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <a href="{% url 'venta_detail' venta.id %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 hover:text-primary-800 hover:bg-primary-50 rounded-lg transition-colors">
+                        <a href="{% url 'venta_detail' venta.id %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 hover:bg-primary-50 rounded-lg transition-colors">
                             <i class="fas fa-eye mr-1.5"></i> Ver
                         </a>
                         {% if user.is_staff or user.groups.first.name == 'Superadmin' or user.groups.first.name == 'Administrador' %}
-                        <button onclick="cancelarVenta({{ venta.id }}, '{{ venta.codigo_ticket }}')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors ml-1">
+                        <button onclick="cancelarVenta({{ venta.id }}, '{{ venta.codigo_ticket }}')" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 rounded-lg transition-colors ml-1">
                             <i class="fas fa-ban mr-1.5"></i> Anular
                         </button>
                         {% endif %}
@@ -53,21 +53,21 @@
     <!-- Pagination -->
     {% if page_obj.has_other_pages %}
     <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-gray-500">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
         <div class="flex gap-2">
             {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Anterior</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">Anterior</a>
             {% endif %}
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Siguiente</a>
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 dark:border-gray-600 rounded-lg text-sm hover:bg-gray-50 dark:hover:bg-gray-700 dark:text-gray-300">Siguiente</a>
             {% endif %}
         </div>
     </div>
     {% endif %}
     {% else %}
-    <div class="bg-white rounded-xl border border-gray-200 p-12 text-center">
-        <i class="fas fa-receipt text-gray-300 text-4xl mb-3"></i>
-        <p class="text-gray-500">No hay ventas registradas</p>
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-12 text-center">
+        <i class="fas fa-receipt text-gray-300 dark:text-gray-600 text-4xl mb-3"></i>
+        <p class="text-gray-500 dark:text-gray-400">No hay ventas registradas</p>
         <a href="{% url 'pos' %}" class="inline-flex items-center gap-2 mt-4 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
             <i class="fas fa-cash-register"></i> Ir al Punto de Venta
         </a>

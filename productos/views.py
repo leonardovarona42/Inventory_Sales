@@ -1,17 +1,13 @@
 from django.shortcuts import render, redirect
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q, F
 from .models import Proveedor, Producto, Categoria
 from .forms import ProveedorForm, ProductoForm
 from inventario.models import MovimientoStock
-
-
-class IsAdminUser(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_staff
+from utils import IsAdminUser
 
 
 class ProveedorListView(LoginRequiredMixin, IsAdminUser, ListView):
@@ -81,6 +77,12 @@ class ProductoCreateView(LoginRequiredMixin, IsAdminUser, CreateView):
     template_name = 'productos/producto_form.html'
     success_url = reverse_lazy('producto_list')
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = Categoria.objects.filter(padre__isnull=True).order_by('nombre')
+        context['selected_cats'] = []
+        return context
+
     def form_valid(self, form):
         response = super().form_valid(form)
         MovimientoStock.objects.create(
@@ -101,6 +103,16 @@ class ProductoUpdateView(LoginRequiredMixin, IsAdminUser, UpdateView):
     form_class = ProductoForm
     template_name = 'productos/producto_form.html'
     success_url = reverse_lazy('producto_list')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categorias'] = Categoria.objects.filter(padre__isnull=True).order_by('nombre')
+        # self.object ya está disponible en UpdateView
+        if self.object:
+            context['selected_cats'] = list(self.object.categorias.values_list('id', flat=True))
+        else:
+            context['selected_cats'] = []
+        return context
 
     def form_valid(self, form):
         producto_anterior = Producto.objects.get(pk=self.object.pk)

@@ -1,16 +1,12 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import ListView, CreateView, DetailView
-from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q, F
 from .models import MovimientoStock
 from productos.models import Producto
-
-
-class IsAdminUser(UserPassesTestMixin):
-    def test_func(self):
-        return self.request.user.is_staff
+from utils import IsAdminUser
 
 
 class MovimientoListView(LoginRequiredMixin, IsAdminUser, ListView):
@@ -20,6 +16,9 @@ class MovimientoListView(LoginRequiredMixin, IsAdminUser, ListView):
     paginate_by = 50
     ordering = ['-fecha']
 
+    def get_queryset(self):
+        return MovimientoStock.objects.select_related('producto').order_by('-fecha')
+
 
 class LowStockListView(LoginRequiredMixin, IsAdminUser, ListView):
     model = Producto
@@ -27,4 +26,6 @@ class LowStockListView(LoginRequiredMixin, IsAdminUser, ListView):
     context_object_name = 'productos'
 
     def get_queryset(self):
-        return Producto.objects.filter(stock_actual__lt=F('stock_minimo'))
+        return Producto.objects.filter(
+            stock_actual__lt=F('stock_minimo')
+        ).select_related('proveedor').prefetch_related('categorias').order_by('nombre')

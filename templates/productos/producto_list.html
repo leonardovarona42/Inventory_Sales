@@ -7,122 +7,278 @@
 <div class="max-w-6xl mx-auto">
     <div class="flex items-center justify-between mb-6">
         <div class="flex items-center gap-3">
-            <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600"><i class="fas fa-arrow-left"></i></a>
-            <h2 class="text-xl font-bold text-gray-900">Productos</h2>
+            <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"><i class="fas fa-arrow-left"></i></a>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Productos</h2>
         </div>
-        <a href="{% url 'producto_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700">
+        <a href="{% url 'producto_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600">
             <i class="fas fa-plus"></i> Nuevo Producto
         </a>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 p-4 mb-6">
-        <form method="get" class="flex gap-3">
+    <!-- Search and Filters Component -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-3">
             <div class="flex-1 relative">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
-                <input type="text" name="search" value="{{ request.GET.search }}" placeholder="Buscar producto..."
-                    class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500">
+                <input type="text" id="searchInput" placeholder="Buscar por nombre, categoria o precio..." 
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white transition-all">
+                <button id="clearSearch" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <select name="categoria" class="px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-primary-500">
-                <option value="">Todas las categorias</option>
-                {% for cat in categorias %}
-                <option value="{{ cat.nombre }}" {% if request.GET.categoria == cat.nombre %}selected{% endif %}>{{ cat.nombre }}</option>
-                {% endfor %}
-            </select>
-            <button type="submit" class="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200">
-                <i class="fas fa-filter"></i>
-            </button>
-        </form>
+            <div class="flex gap-2 flex-wrap">
+                <select id="categoryFilter" class="px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white min-w-[180px]">
+                    <option value="">Todas las categorias</option>
+                    {% for cat in categorias %}
+                    <option value="{{ cat.nombre|lower }}">{{ cat.nombre }}</option>
+                    {% endfor %}
+                </select>
+                <select id="stockFilter" class="px-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white">
+                    <option value="">Todo el stock</option>
+                    <option value="bajo">Stock bajo</option>
+                    <option value="sin">Sin stock</option>
+                    <option value="disponible">Disponible</option>
+                </select>
+            </div>
+        </div>
+        <div class="mt-3 flex items-center justify-between">
+            <p id="resultsCount" class="text-sm text-gray-500 dark:text-gray-400">
+                Mostrando <span id="visibleCount">0</span> de {{ page_obj.object_list|length }} productos en esta pagina
+                <span class="text-xs text-gray-400">({{ page_obj.paginator.count }} total)</span>
+            </p>
+            <div class="flex gap-2">
+                <button id="btnFilterCost" class="price-filter px-3 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-field="costo" data-order="none">
+                    Costo <i class="fas fa-sort ml-1"></i>
+                </button>
+                <button id="btnFilterVenta" class="price-filter px-3 py-1 text-xs border border-gray-200 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700" data-field="venta" data-order="none">
+                    Venta <i class="fas fa-sort ml-1"></i>
+                </button>
+            </div>
+        </div>
     </div>
 
-    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
-        <table class="w-full">
-            <thead class="bg-gray-50 border-b border-gray-200">
+    <!-- Results Table -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <table class="w-full" id="productsTable">
+            <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Producto</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Categoria</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Stock</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Costo</th>
-                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">Venta</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Estado</th>
-                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase">Acciones</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Producto</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Categoria</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Stock</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Costo</th>
+                    <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Venta</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estado</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="divide-y divide-gray-100">
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700" id="productsBody">
                 {% for producto in productos %}
-                <tr class="hover:bg-gray-50">
+                <tr class="product-row hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors" 
+                    data-name="{{ producto.nombre|lower }}" 
+                    data-categories="{% for cat in producto.categorias.all %}{{ cat.nombre|lower }} {% endfor %}"
+                    data-costo="{{ producto.precio_costo }}"
+                    data-venta="{{ producto.precio_venta }}"
+                    data-stock="{{ producto.stock_actual }}"
+                    data-stock-min="{{ producto.stock_minimo }}">
                     <td class="px-6 py-4">
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                            <div class="w-10 h-10 bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center flex-shrink-0 overflow-hidden">
                                 {% if producto.imagen %}
-                                    <img src="{{ producto.imagen.url }}" class="w-full h-full object-cover rounded-lg">
+                                    <img src="{{ producto.imagen.url }}" class="w-full h-full object-cover">
                                 {% else %}
                                     <i class="fas fa-box text-gray-400"></i>
                                 {% endif %}
                             </div>
                             <div>
-                                <p class="font-medium text-gray-900">{{ producto.nombre }}</p>
-                                <p class="text-xs text-gray-500">{{ producto.unidad_medida }}</p>
+                                <p class="font-medium text-gray-900 dark:text-white product-name">{{ producto.nombre }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ producto.unidad_medida }}</p>
                             </div>
                         </div>
                     </td>
                     <td class="px-6 py-4">
-                        <div class="flex gap-1 flex-wrap">
+                        <div class="flex gap-1 flex-wrap product-categories">
                             {% for cat in producto.categorias.all %}
                                 {% if not cat.padre %}
-                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs">{{ cat.nombre }}</span>
+                                <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs dark:bg-gray-700 dark:text-gray-300">{{ cat.nombre }}</span>
                                 {% endif %}
                             {% endfor %}
                         </div>
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <span class="font-semibold {% if producto.stock_actual < producto.stock_minimo %}text-red-600{% else %}text-green-600{% endif %}">
+                        <span class="font-semibold stock-value {% if producto.stock_actual < producto.stock_minimo %}text-red-600 dark:text-red-400{% else %}text-green-600 dark:text-green-400{% endif %}">
                             {{ producto.stock_actual }}
                         </span>
                     </td>
-                    <td class="px-6 py-4 text-right text-sm">${{ producto.precio_costo|floatformat:2 }}</td>
-                    <td class="px-6 py-4 text-right text-sm font-semibold text-green-600">${{ producto.precio_venta|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm text-gray-700 dark:text-gray-300 cost-value">${{ producto.precio_costo|floatformat:2 }}</td>
+                    <td class="px-6 py-4 text-right text-sm font-semibold text-green-600 dark:text-green-400 sale-value">${{ producto.precio_venta|floatformat:2 }}</td>
                     <td class="px-6 py-4 text-center">
                         {% if producto.stock_actual < producto.stock_minimo %}
-                            <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-medium">Bajo</span>
+                            <span class="px-2 py-0.5 bg-red-100 text-red-800 rounded-full text-xs font-medium dark:bg-red-900/30 dark:text-red-400">Bajo</span>
                         {% elif producto.stock_actual == 0 %}
-                            <span class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full text-xs font-medium">Sin stock</span>
+                            <span class="px-2 py-0.5 bg-gray-100 text-gray-800 rounded-full text-xs font-medium dark:bg-gray-700 dark:text-gray-300">Sin stock</span>
                         {% else %}
-                            <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium">OK</span>
+                            <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium dark:bg-green-900/30 dark:text-green-400">OK</span>
                         {% endif %}
                     </td>
                     <td class="px-6 py-4 text-center">
-                        <a href="{% url 'producto_detail' producto.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded-lg">
+                        <a href="{% url 'producto_detail' producto.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-primary-600 hover:bg-primary-50 rounded-lg dark:text-primary-400 dark:hover:bg-primary-900/30">
                             <i class="fas fa-eye mr-1"></i> Ver
                         </a>
-                        <a href="{% url 'producto_update' producto.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-lg">
+                        <a href="{% url 'producto_update' producto.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-lg dark:text-blue-400 dark:hover:text-blue-300 dark:hover:bg-blue-900/30">
                             <i class="fas fa-edit"></i>
                         </a>
                     </td>
                 </tr>
                 {% empty %}
-                <tr>
-                    <td colspan="7" class="px-6 py-12 text-center text-gray-500">
-                        <i class="fas fa-box-open text-3xl mb-2 text-gray-300"></i>
+                <tr id="emptyRow">
+                    <td colspan="7" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-box-open text-3xl mb-2 text-gray-300 dark:text-gray-600"></i>
                         <p>No hay productos registrados</p>
                     </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
+        <div id="noResults" class="hidden px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+            <i class="fas fa-search text-3xl mb-2 text-gray-300 dark:text-gray-600"></i>
+            <p>No se encontraron productos que coincidan con la busqueda</p>
+        </div>
     </div>
 
     {% if page_obj.has_other_pages %}
     <div class="flex items-center justify-between mt-4">
-        <p class="text-sm text-gray-500">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
+        <p class="text-sm text-gray-500 dark:text-gray-400">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
         <div class="flex gap-2">
             {% if page_obj.has_previous %}
-                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Anterior</a>
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Anterior</a>
             {% endif %}
             {% if page_obj.has_next %}
-                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50">Siguiente</a>
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Siguiente</a>
             {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const stockFilter = document.getElementById('stockFilter');
+    const productsBody = document.getElementById('productsBody');
+    const noResults = document.getElementById('noResults');
+    const visibleCount = document.getElementById('visibleCount');
+    const clearBtn = document.getElementById('clearSearch');
+    const priceFilters = document.querySelectorAll('.price-filter');
+    const totalCount = {{ page_obj.paginator.count|default:0 }};
+    
+    const rows = Array.from(productsBody.querySelectorAll('.product-row'));
+    
+    function filterProducts() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategory = categoryFilter.value;
+        const selectedStock = stockFilter.value;
+        
+        let visible = 0;
+        
+        rows.forEach(row => {
+            const name = (row.dataset.name || '').toLowerCase();
+            const categories = (row.dataset.categories || '').toLowerCase();
+            const costo = parseFloat(row.dataset.costo) || 0;
+            const venta = parseFloat(row.dataset.venta) || 0;
+            const stock = parseFloat(row.dataset.stock) || 0;
+            const stockMin = parseFloat(row.dataset.stockMin) || 0;
+            
+            let showBySearch = true;
+            let showByCategory = true;
+            let showByStock = true;
+            
+            if (searchTerm) {
+                const searchNum = parseFloat(searchTerm);
+                const isNumber = !isNaN(searchNum);
+                
+                showBySearch = name.includes(searchTerm) || 
+                               categories.includes(searchTerm) || 
+                               (isNumber && (Math.abs(costo - searchNum) < 0.01 || Math.abs(venta - searchNum) < 0.01));
+            }
+            
+            if (selectedCategory) {
+                showByCategory = categories.includes(selectedCategory.toLowerCase());
+            }
+            
+            if (selectedStock) {
+                if (selectedStock === 'bajo') {
+                    showByStock = stock < stockMin;
+                } else if (selectedStock === 'sin') {
+                    showByStock = stock === 0;
+                } else if (selectedStock === 'disponible') {
+                    showByStock = stock > 0 && stock >= stockMin;
+                }
+            }
+            
+            const show = showBySearch && showByCategory && showByStock;
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+        
+        visibleCount.textContent = visible;
+        noResults.classList.toggle('hidden', visible > 0);
+        clearBtn.classList.toggle('hidden', !searchTerm);
+    }
+    
+    searchInput.addEventListener('input', filterProducts);
+    categoryFilter.addEventListener('change', filterProducts);
+    stockFilter.addEventListener('change', filterProducts);
+    
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        filterProducts();
+        searchInput.focus();
+    });
+    
+    priceFilters.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const field = this.dataset.field;
+            let order = this.dataset.order || 'none';
+            
+            priceFilters.forEach(b => {
+                if (b !== this) {
+                    b.dataset.order = 'none';
+                    b.innerHTML = b.dataset.field === 'costo' ? 'Costo <i class="fas fa-sort ml-1"></i>' : 'Venta <i class="fas fa-sort ml-1"></i>';
+                }
+            });
+            
+            if (order === 'none') {
+                order = 'asc';
+                this.innerHTML = field === 'costo' ? 'Costo <i class="fas fa-sort-up ml-1"></i>' : 'Venta <i class="fas fa-sort-up ml-1"></i>';
+            } else if (order === 'asc') {
+                order = 'desc';
+                this.innerHTML = field === 'costo' ? 'Costo <i class="fas fa-sort-down ml-1"></i>' : 'Venta <i class="fas fa-sort-down ml-1"></i>';
+            } else {
+                order = 'none';
+                this.innerHTML = field === 'costo' ? 'Costo <i class="fas fa-sort ml-1"></i>' : 'Venta <i class="fas fa-sort ml-1"></i>';
+            }
+            
+            this.dataset.order = order;
+            
+            if (order === 'none') {
+                filterProducts();
+                return;
+            }
+            
+            const sorted = rows.sort((a, b) => {
+                const valA = parseFloat(field === 'costo' ? a.dataset.costo : a.dataset.venta) || 0;
+                const valB = parseFloat(field === 'costo' ? b.dataset.costo : b.dataset.venta) || 0;
+                return order === 'asc' ? valA - valB : valB - valA;
+            });
+            
+            sorted.forEach(row => productsBody.appendChild(row));
+        });
+    });
+    
+    filterProducts();
+});
+</script>
 {% endblock %}
