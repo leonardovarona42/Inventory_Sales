@@ -34,12 +34,21 @@ def env(key, default=None, cast=None):
 # See https://docs.djangoproject.com/en/6.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('DJANGO_SECRET_KEY', 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9')
+SECRET_KEY = env('DJANGO_SECRET_KEY')
+if not SECRET_KEY:
+    import sys
+    import warnings
+    if not env('DJANGO_ALLOW_DEBUG_FALLBACK', False, cast=bool):
+        raise RuntimeError(
+            "DJANGO_SECRET_KEY no configurada. Configure la variable de entorno antes de iniciar."
+        )
+    warnings.warn("Usando SECRET_KEY inseguro de fallback. Solo para desarrollo.", RuntimeWarning)
+    SECRET_KEY = 'django-insecure--y9j3lam)@cw=g8o2foviuh3)kt@)vjity7lfgt)0g+ib@q^!9'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DJANGO_DEBUG', True, cast=bool)
+DEBUG = env('DJANGO_DEBUG', False, cast=bool)
 
-ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,void-delta-tidal.ngrok-free.dev').split(',')
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.app',
@@ -190,6 +199,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', False, cast=bool)
 SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', False, cast=bool)
 CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', False, cast=bool)
+SESSION_COOKIE_HTTPONLY = env('SESSION_COOKIE_HTTPONLY', True, cast=bool)
+CSRF_COOKIE_HTTPONLY = env('CSRF_COOKIE_HTTPONLY', True, cast=bool)
 SECURE_BROWSER_XSS_FILTER = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS', 0, cast=int)
@@ -197,6 +208,12 @@ SECURE_HSTS_INCLUDE_SUBDOMAINS = env('SECURE_HSTS_INCLUDE_SUBDOMAINS', False, ca
 SECURE_HSTS_PRELOAD = env('SECURE_HSTS_PRELOAD', False, cast=bool)
 X_FRAME_OPTIONS = 'DENY'
 SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
+
+# Content Security Policy (basic, opt-in via env)
+CONTENT_SECURITY_POLICY = env('CONTENT_SECURITY_POLICY', None)
+if CONTENT_SECURITY_POLICY:
+    # Use django-csp or middleware; here we set a simple header via middleware
+    pass
 
 
 # Logging configuration

@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django.utils import timezone
 
 from .models import Venta, DetalleVenta
+from productos.models import Producto
 from inventario.models import MovimientoStock
 
 logger = logging.getLogger(__name__)
@@ -22,15 +23,25 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
     Registra una venta completa dentro de una transaccion atomica.
 
     items: lista de dicts con llaves `producto` y `cantidad`.
+            Los productos deben estar bloqueados con select_for_update.
 
     Retorna: instancia de Venta
 
     Lanza: ValidationError si stock insuficiente
     """
+    from django.db import transaction as db_transaction
+
     errores_stock = []
 
+    productos_ids = [item["producto"].id for item in items]
+    productos_locked = Producto.objects.select_for_update().filter(id__in=productos_ids)
+    producto_por_id = {p.id: p for p in productos_locked}
+
     for item in items:
-        producto = item["producto"]
+        producto = producto_por_id.get(item["producto"].id)
+        if not producto:
+            errores_stock.append(f"{item['producto'].nombre}: producto no encontrado")
+            continue
         cantidad = item["cantidad"]
         if producto.stock_actual < cantidad:
             errores_stock.append(
@@ -60,7 +71,7 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
     detalles_creados = []
     total_venta = Decimal("0")
     for item in items:
-        producto = item["producto"]
+        producto = producto_por_id[item["producto"].id]
         precio = producto.precio_venta or producto.precio_costo or Decimal("0")
         detalle = DetalleVenta.objects.create(
             venta=venta,

@@ -56,7 +56,7 @@ class DetalleVenta(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.precio_unitario and self.id_producto:
-            self.precio_unitario = self.id_producto.precio_actual or self.id_producto.precio_base
+            self.precio_unitario = self.id_producto.precio_venta or self.id_producto.precio_costo or Decimal("0")
         super().save(*args, **kwargs)
 
     def clean(self):

@@ -99,14 +99,14 @@
                 </a>
                 {% endif %}
 
-                {% if user.is_staff or user.groups.first.name == 'Superadmin' %}
+                {% if user.is_staff or user.groups.filter(name='Superadmin').exists %}
                 <div class="sidebar-section">Reportes</div>
                 <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <i class="fas fa-chart-line w-5 text-center"></i><span>Dashboard</span>
                 </a>
                 {% endif %}
 
-                {% if user.groups.first.name == 'Superadmin' or user.is_superuser %}
+                {% if user.is_superuser or user.groups.filter(name='Superadmin').exists %}
                 <div class="sidebar-section">Administracion</div>
                 <a href="{% url 'usuario_list' %}" class="sidebar-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-users-gear w-5 text-center"></i><span>Usuarios</span>

@@ -1,5 +1,7 @@
 from django import forms
 from .models import Proveedor, Producto, Categoria
+from django.core.validators import FileExtensionValidator
+from django.utils.translation import gettext_lazy as _
 
 INPUT = 'w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
 
@@ -36,3 +38,18 @@ class ProductoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         self.fields['proveedor'].required = False
         self.fields['categorias'].help_text = None
+        self.fields['imagen'].validators.append(
+            FileExtensionValidator(
+                ['jpg', 'jpeg', 'png', 'gif', 'webp'],
+                _("Solo se permiten imagenes (jpg, jpeg, png, gif, webp)")
+            )
+        )
+
+    def clean_imagen(self):
+        imagen = self.cleaned_data.get('imagen')
+        if imagen:
+            if imagen.size > 5 * 1024 * 1024:  # 5MB limit
+                raise forms.ValidationError(_("El archivo es demasiado grande (maximo 5MB)"))
+            if not imagen.content_type.startswith('image/'):
+                raise forms.ValidationError(_("El archivo debe ser una imagen"))
+        return imagen
