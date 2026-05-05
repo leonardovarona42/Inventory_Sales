@@ -70,7 +70,7 @@ class Producto(models.Model):
 
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(blank=True)
-    codigo_barras = models.CharField(max_length=50, unique=True, blank=True, default="", db_index=True, verbose_name="Codigo de Barras")
+    codigo_barras = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True, verbose_name="Codigo de Barras")
     lote = models.CharField(max_length=100, blank=True, default="", verbose_name="Lote")
     fecha_vencimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento")
     unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default=UNIDAD)
