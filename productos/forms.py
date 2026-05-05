@@ -39,11 +39,14 @@ class ProveedorForm(forms.ModelForm):
 class ProductoForm(forms.ModelForm):
     class Meta:
         model = Producto
-        fields = ['nombre', 'descripcion', 'unidad_medida', 'stock_actual', 'stock_minimo',
+        fields = ['nombre', 'descripcion', 'codigo_barras', 'lote', 'fecha_vencimiento', 'unidad_medida', 'stock_actual', 'stock_minimo',
                   'precio_costo', 'precio_venta', 'imagen', 'proveedor', 'categorias']
         widgets = {
             'nombre': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'Nombre del producto'}),
             'descripcion': forms.Textarea(attrs={'class': INPUT, 'rows': 3, 'placeholder': 'Descripcion'}),
+            'codigo_barras': forms.TextInput(attrs={'class': INPUT, 'placeholder': '7501234567890'}),
+            'lote': forms.TextInput(attrs={'class': INPUT, 'placeholder': 'LOTE-001'}),
+            'fecha_vencimiento': forms.DateInput(attrs={'class': INPUT, 'type': 'date'}),
             'unidad_medida': forms.Select(attrs={'class': INPUT}),
             'stock_actual': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),
             'stock_minimo': forms.NumberInput(attrs={'class': INPUT, 'step': '0.01'}),

@@ -4,6 +4,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.db.models import Q, F
+from django.utils import timezone
 from .models import Proveedor, Producto, Categoria
 from .forms import ProveedorForm, ProductoForm, CategoriaForm
 from inventario.models import MovimientoStock
@@ -108,7 +109,7 @@ class ProductoListView(LoginRequiredMixin, IsAdminUser, ListView):
         search = self.request.GET.get('search')
         categoria = self.request.GET.get('categoria')
         if search:
-            queryset = queryset.filter(Q(nombre__icontains=search) | Q(descripcion__icontains=search))
+            queryset = queryset.filter(Q(nombre__icontains=search) | Q(descripcion__icontains=search) | Q(codigo_barras__icontains=search))
         if categoria:
             queryset = queryset.filter(categorias__nombre=categoria)
         return queryset
@@ -202,4 +203,5 @@ class ProductoDetailView(LoginRequiredMixin, IsAdminUser, DetailView):
         context['movimientos'] = MovimientoStock.objects.filter(producto=producto).order_by('-fecha')[:10]
         context['valor_total'] = producto.stock_actual * producto.precio_costo
         context['necesita_reorden'] = producto.necesita_reorden()
+        context['today'] = timezone.now().date()
         return context

@@ -68,6 +68,28 @@
         </div>
         {% endif %}
 
+        <!-- Barcode, Lot, Expiry -->
+        <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700 grid grid-cols-3 gap-4">
+            {% if producto.codigo_barras %}
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Codigo de Barras</p>
+                <p class="font-mono text-sm text-gray-900 dark:text-white">{{ producto.codigo_barras }}</p>
+            </div>
+            {% endif %}
+            {% if producto.lote %}
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Lote</p>
+                <p class="text-sm text-gray-900 dark:text-white">{{ producto.lote }}</p>
+            </div>
+            {% endif %}
+            {% if producto.fecha_vencimiento %}
+            <div>
+                <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Vencimiento</p>
+                <p class="text-sm {% if producto.fecha_vencimiento < today %}text-red-600 dark:text-red-400 font-semibold{% else %}text-gray-900 dark:text-white{% endif %}">{{ producto.fecha_vencimiento|date:"d/m/Y" }}</p>
+            </div>
+            {% endif %}
+        </div>
+
         <!-- Product Image (full size) -->
         {% if producto.imagen %}
         <div class="px-6 py-4 border-t border-gray-100 dark:border-gray-700">

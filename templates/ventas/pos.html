@@ -10,10 +10,17 @@
     <div class="flex-1 flex flex-col overflow-hidden min-w-0">
     <!-- Search Bar - full width -->
     <div class="mb-3">
-        <div class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
-            <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
-                class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700 dark:text-white text-sm sm:text-base">
+        <div class="flex gap-2">
+            <div class="relative flex-1">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
+                <input type="text" id="searchProducts" placeholder="Buscar producto por nombre..."
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:bg-gray-700 dark:text-white text-sm sm:text-base">
+            </div>
+            <div class="relative w-48 sm:w-56">
+                <i class="fas fa-barcode absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500"></i>
+                <input type="text" id="barcodeInput" placeholder="Escanear codigo..."
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 dark:focus:ring-green-400 dark:bg-gray-700 dark:text-white text-sm sm:text-base">
+            </div>
         </div>
     </div>
 
@@ -37,7 +44,9 @@
                 {% for producto in productos %}
                 <button onclick="agregarAlCarrito({{ producto.id }})"
                     class="group bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg sm:rounded-xl p-2 sm:p-4 hover:border-green-400 dark:hover:border-green-600 hover:shadow-md transition-all text-left product-card"
+                    data-id="{{ producto.id }}"
                     data-name="{{ producto.nombre|lower }}"
+                    data-barcode="{{ producto.codigo_barras|default:'' }}"
                     data-categories="{% for c in producto.categorias.all %}{{ c.nombre }} {% if c.padre %}{{ c.padre.nombre }}{% endif %}{% endfor %}">
                     <div class="aspect-square bg-gray-100 dark:bg-gray-700 rounded-lg mb-2 sm:mb-3 flex items-center justify-center overflow-hidden">
                         {% if producto.imagen %}
@@ -379,6 +388,51 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchProducts').addEventListener('input', function(e) {
         filterProducts(e.target.value.toLowerCase(), activeCategory);
     });
+
+    // Barcode scanner input (scanners send Enter after code)
+    const barcodeInput = document.getElementById('barcodeInput');
+    if (barcodeInput) {
+        barcodeInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const code = this.value.trim();
+                if (!code) return;
+                // Find product by barcode in the grid
+                const card = document.querySelector(`.product-card[data-barcode="${code}"]`);
+                if (card) {
+                    const productId = card.dataset.id;
+                    if (productId) {
+                        agregarAlCarrito(parseInt(productId));
+                        this.value = '';
+                        // Flash green border on success
+                        this.classList.add('border-green-500', 'ring-2', 'ring-green-200');
+                        setTimeout(() => this.classList.remove('border-green-500', 'ring-2', 'ring-green-200'), 800);
+                    }
+                } else {
+                    // Try AJAX search by barcode
+                    buscarPorCodigoBarras(code);
+                }
+            }
+        });
+    }
+
+    async function buscarPorCodigoBarras(code) {
+        try {
+            const res = await fetch('{% url "ajax_buscar_producto_barras" %}?codigo=' + encodeURIComponent(code), {
+                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+            });
+            const data = await res.json();
+            if (data.success && data.producto) {
+                agregarAlCarrito(data.producto.id);
+                barcodeInput.value = '';
+                barcodeInput.classList.add('border-green-500', 'ring-2', 'ring-green-200');
+                setTimeout(() => barcodeInput.classList.remove('border-green-500', 'ring-2', 'ring-green-200'), 800);
+            } else {
+                barcodeInput.classList.add('border-red-500', 'ring-2', 'ring-red-200');
+                setTimeout(() => barcodeInput.classList.remove('border-red-500', 'ring-2', 'ring-red-200'), 800);
+            }
+        } catch (e) { console.error('Error buscando por codigo de barras:', e); }
+    }
 
     window.filterCategory = function(cat) {
         if (activeCategory === cat && cat !== '') {

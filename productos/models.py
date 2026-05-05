@@ -70,6 +70,9 @@ class Producto(models.Model):
 
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(blank=True)
+    codigo_barras = models.CharField(max_length=50, unique=True, blank=True, default="", db_index=True, verbose_name="Codigo de Barras")
+    lote = models.CharField(max_length=100, blank=True, default="", verbose_name="Lote")
+    fecha_vencimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento")
     unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default=UNIDAD)
     stock_actual = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     stock_minimo = models.DecimalField(max_digits=10, decimal_places=2, default=5)
@@ -83,6 +86,10 @@ class Producto(models.Model):
 
     class Meta:
         ordering = ['nombre']
+        indexes = [
+            models.Index(fields=['codigo_barras']),
+            models.Index(fields=['fecha_vencimiento']),
+        ]
 
     def __str__(self):
         return f"{self.nombre} ({self.stock_actual} {self.unidad_medida})"

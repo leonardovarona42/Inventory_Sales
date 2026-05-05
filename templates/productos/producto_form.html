@@ -52,13 +52,27 @@
                         </div>
                         <div class="grid grid-cols-2 gap-4">
                             <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Codigo de Barras</label>
+                                {{ form.codigo_barras }}
+                            </div>
+                            <div>
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Unidad de Medida</label>
                                 {{ form.unidad_medida }}
                             </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Proveedor</label>
-                                {{ form.proveedor }}
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Lote</label>
+                                {{ form.lote }}
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Fecha Vencimiento</label>
+                                {{ form.fecha_vencimiento }}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5">Proveedor</label>
+                            {{ form.proveedor }}
                         </div>
                     </div>
                 </div>

@@ -209,6 +209,30 @@ def ajax_buscar_cliente(request):
     return JsonResponse({"success": True, "clientes": list(clientes)})
 
 
+@login_required
+def ajax_buscar_producto_barras(request):
+    if not _usuario_puede_vender(request.user):
+        return JsonResponse({"success": False, "error": "No autorizado"}, status=403)
+
+    codigo = request.GET.get("codigo", "").strip()
+    if not codigo:
+        return JsonResponse({"success": False, "error": "Codigo requerido"})
+
+    try:
+        producto = Producto.objects.get(codigo_barras=codigo, stock_actual__gt=0)
+        return JsonResponse({
+            "success": True,
+            "producto": {
+                "id": producto.id,
+                "nombre": producto.nombre,
+                "precio": str(producto.precio_venta or producto.precio_costo or 0),
+                "stock": float(producto.stock_actual),
+            }
+        })
+    except Producto.DoesNotExist:
+        return JsonResponse({"success": False, "error": "Producto no encontrado o sin stock"})
+
+
 class ClienteListView(LoginRequiredMixin, IsCajeroOrAbove, ListView):
     model = Cliente
     template_name = 'ventas/cliente_list.html'

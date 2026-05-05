@@ -12,6 +12,7 @@ urlpatterns = [
     path('pos/ajax/procesar/', views.ajax_procesar_venta, name='ajax_procesar_venta'),
     path('pos/ajax/buscar-cliente/', views.ajax_buscar_cliente, name='ajax_buscar_cliente'),
     path('pos/ajax/crear-cliente/', views.ajax_crear_cliente, name='cliente_create_ajax'),
+    path('pos/ajax/buscar-barras/', views.ajax_buscar_producto_barras, name='ajax_buscar_producto_barras'),
     path('clientes/', views.ClienteListView.as_view(), name='cliente_list'),
     path('clientes/nuevo/', views.ClienteCreateView.as_view(), name='cliente_create'),
     path('clientes/<int:pk>/editar/', views.ClienteUpdateView.as_view(), name='cliente_update'),
