@@ -1,6 +1,21 @@
 from django import forms
-from .models import Venta, DetalleVenta
+from .models import Venta, DetalleVenta, Cliente
 from productos.models import Producto
+
+
+class ClienteForm(forms.ModelForm):
+    class Meta:
+        model = Cliente
+        fields = ['nombre', 'email', 'telefono', 'direccion', 'rnc', 'notas', 'activa']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Nombre completo'}),
+            'email': forms.EmailInput(attrs={'class': 'input-field', 'placeholder': 'correo@ejemplo.com'}),
+            'telefono': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '+53 XXXX XXXX'}),
+            'direccion': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Direccion completa'}),
+            'rnc': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'RNC o CI'}),
+            'notas': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Notas adicionales'}),
+            'activa': forms.CheckboxInput(attrs={'class': 'rounded'}),
+        }
 
 
 class VentaForm(forms.ModelForm):

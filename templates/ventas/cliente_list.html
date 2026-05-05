@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Clientes{% endblock %}
+{% block page_title %}Gestion de Clientes{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+            <a href="{% url 'home' %}" class="text-gray-400 hover:text-gray-600 dark:text-gray-500 dark:hover:text-gray-400"><i class="fas fa-arrow-left"></i></a>
+            <h2 class="text-xl font-bold text-gray-900 dark:text-white">Clientes</h2>
+        </div>
+        {% if user.is_superuser or user.groups.all.0.name == 'Superadmin' or user.groups.all.0.name == 'Administrador' %}
+        <a href="{% url 'cliente_create' %}" class="inline-flex items-center gap-2 px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 dark:bg-primary-500 dark:hover:bg-primary-600">
+            <i class="fas fa-plus"></i> Nuevo Cliente
+        </a>
+        {% endif %}
+    </div>
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-primary-100 dark:bg-primary-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-users text-primary-600 dark:text-primary-400"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Total</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ total }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-green-100 dark:bg-green-900/30 rounded-lg flex items-center justify-center">
+                    <i class="fas fa-check-circle text-green-600 dark:text-green-400"></i>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Activos</p>
+                    <p class="text-lg font-bold text-gray-900 dark:text-white">{{ activos }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 mb-6">
+        <div class="flex flex-col sm:flex-row gap-3">
+            <div class="flex-1 relative">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="searchInput" placeholder="Buscar cliente..."
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white">
+                <button id="clearSearch" class="hidden absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
+        <table class="w-full" id="clientesTable">
+            <thead class="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Nombre</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden sm:table-cell">Email</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Telefono</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase hidden md:table-cell">Ventas</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Estado</th>
+                    <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Acciones</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100 dark:divide-gray-700" id="clientesBody">
+                {% for cliente in clientes %}
+                <tr class="cliente-row hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    data-name="{{ cliente.nombre|lower }}">
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-primary-100 dark:bg-primary-900/30 flex items-center justify-center flex-shrink-0">
+                                <i class="fas fa-user text-primary-600 dark:text-primary-400 text-xs"></i>
+                            </div>
+                            <div>
+                                <p class="font-medium text-gray-900 dark:text-white">{{ cliente.nombre }}</p>
+                                {% if cliente.rnc %}
+                                <p class="text-xs text-gray-400 dark:text-gray-500">RNC/CI: {{ cliente.rnc }}</p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400 hidden sm:table-cell">{{ cliente.email|default:"—" }}</td>
+                    <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-400">{{ cliente.telefono|default:"—" }}</td>
+                    <td class="px-6 py-4 text-center hidden md:table-cell">
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ cliente.num_ventas }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if cliente.activa %}
+                        <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded-full text-xs font-medium dark:bg-green-900/30 dark:text-green-400">Activo</span>
+                        {% else %}
+                        <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded-full text-xs font-medium dark:bg-gray-700 dark:text-gray-400">Inactivo</span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 text-center">
+                        {% if user.is_superuser or user.groups.all.0.name == 'Superadmin' or user.groups.all.0.name == 'Administrador' %}
+                        <div class="flex items-center justify-center gap-1">
+                            <a href="{% url 'cliente_update' cliente.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-blue-600 hover:bg-blue-50 rounded-lg dark:text-blue-400 dark:hover:bg-blue-900/30">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                            <a href="{% url 'cliente_delete' cliente.id %}" class="inline-flex items-center px-2.5 py-1 text-sm text-red-600 hover:bg-red-50 rounded-lg dark:text-red-400 dark:hover:bg-red-900/30">
+                                <i class="fas fa-trash"></i>
+                            </a>
+                        </div>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+                        <i class="fas fa-users text-3xl mb-2 text-gray-300 dark:text-gray-600"></i>
+                        <p>No hay clientes registrados</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div id="noResults" class="hidden px-6 py-12 text-center text-gray-500 dark:text-gray-400">
+            <i class="fas fa-search text-3xl mb-2 text-gray-300 dark:text-gray-600"></i>
+            <p>No se encontraron clientes</p>
+        </div>
+    </div>
+
+    {% if page_obj.has_other_pages %}
+    <div class="flex items-center justify-between mt-4">
+        <p class="text-sm text-gray-500 dark:text-gray-400">Pagina {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Anterior</a>
+            {% endif %}
+            {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}" class="px-3 py-1.5 border border-gray-300 rounded-lg text-sm hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">Siguiente</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const clearBtn = document.getElementById('clearSearch');
+    const noResults = document.getElementById('noResults');
+    const rows = Array.from(document.querySelectorAll('.cliente-row'));
+
+    function filterClientes() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        let visible = 0;
+
+        rows.forEach(row => {
+            const name = (row.dataset.name || '').toLowerCase();
+            const show = !searchTerm || name.includes(searchTerm);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        noResults.classList.toggle('hidden', visible > 0);
+        clearBtn.classList.toggle('hidden', !searchTerm);
+    }
+
+    searchInput.addEventListener('input', filterClientes);
+    clearBtn.addEventListener('click', function() {
+        searchInput.value = '';
+        filterClientes();
+        searchInput.focus();
+    });
+
+    filterClientes();
+});
+</script>
+{% endblock %}

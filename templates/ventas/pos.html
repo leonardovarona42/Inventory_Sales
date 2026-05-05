@@ -84,6 +84,29 @@
         </div>
 
         <div class="border-t border-gray-100 dark:border-gray-700 p-5 space-y-4">
+            <!-- Customer Section (Desktop) -->
+            <div id="cartClienteSection">
+                <button type="button" onclick="abrirModalCliente()" class="w-full flex items-center gap-3 px-3 py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-colors">
+                    <i class="fas fa-user-plus text-lg"></i>
+                    <span class="text-sm font-medium">Agregar Cliente</span>
+                </button>
+            </div>
+            <div id="cartClienteInfo" class="hidden">
+                <div class="flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+                    <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user text-primary-600 dark:text-primary-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="cartClienteNombre" class="text-sm font-semibold text-gray-900 dark:text-white truncate"></p>
+                        <p id="cartClienteDetalle" class="text-xs text-gray-500 dark:text-gray-400 truncate"></p>
+                    </div>
+                    <button type="button" onclick="clearCliente()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 flex-shrink-0" title="Quitar cliente">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <input type="hidden" id="clienteId" value="">
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metodo de pago</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -144,6 +167,28 @@
         </div>
 
         <div class="border-t border-gray-100 dark:border-gray-700 p-5 space-y-4">
+            <!-- Customer Section (Mobile) -->
+            <div id="mobileClienteSection">
+                <button type="button" onclick="abrirModalCliente()" class="w-full flex items-center gap-3 px-3 py-2.5 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg text-gray-500 dark:text-gray-400 hover:border-primary-400 hover:text-primary-600 dark:hover:border-primary-500 dark:hover:text-primary-400 transition-colors">
+                    <i class="fas fa-user-plus text-lg"></i>
+                    <span class="text-sm font-medium">Agregar Cliente</span>
+                </button>
+            </div>
+            <div id="mobileClienteInfo" class="hidden">
+                <div class="flex items-center gap-3 p-3 bg-primary-50 dark:bg-primary-900/20 border border-primary-200 dark:border-primary-800 rounded-lg">
+                    <div class="w-8 h-8 bg-primary-100 dark:bg-primary-900/40 rounded-full flex items-center justify-center flex-shrink-0">
+                        <i class="fas fa-user text-primary-600 dark:text-primary-400 text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p id="mobileClienteNombre" class="text-sm font-semibold text-gray-900 dark:text-white truncate"></p>
+                        <p id="mobileClienteDetalle" class="text-xs text-gray-500 dark:text-gray-400 truncate"></p>
+                    </div>
+                    <button type="button" onclick="clearCliente()" class="text-gray-400 hover:text-red-500 dark:hover:text-red-400 flex-shrink-0" title="Quitar cliente">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>
+
             <div>
                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Metodo de pago</label>
                 <div class="grid grid-cols-2 gap-2">
@@ -176,6 +221,81 @@
                     <i class="fas fa-check mr-1"></i> Cobrar
                 </button>
             </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cliente Modal -->
+<div id="clienteModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl w-full max-w-lg mx-4 overflow-hidden">
+        <div class="px-6 py-4 bg-primary-600 text-white flex items-center justify-between">
+            <h3 class="text-lg font-semibold"><i class="fas fa-user-plus mr-2"></i>Agregar Cliente</h3>
+            <button onclick="cerrarModalCliente()" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-primary-700">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 dark:border-gray-700">
+            <button id="tabExistente" onclick="switchClienteTab('existente')" class="flex-1 px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20">
+                <i class="fas fa-search mr-1"></i> Buscar Existente
+            </button>
+            <button id="tabNuevo" onclick="switchClienteTab('nuevo')" class="flex-1 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300">
+                <i class="fas fa-plus mr-1"></i> Nuevo Cliente
+            </button>
+        </div>
+
+        <!-- Tab: Buscar Existente -->
+        <div id="panelExistente" class="p-6">
+            <div class="relative mb-4">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                <input type="text" id="modalClienteSearch" placeholder="Buscar por nombre (min 2 caracteres)..." autocomplete="off"
+                    class="w-full pl-10 pr-4 py-2.5 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 dark:bg-gray-700 dark:text-white">
+            </div>
+            <div id="modalClienteResults" class="space-y-1 max-h-64 overflow-y-auto"></div>
+            <div id="modalClienteEmpty" class="text-center py-8 text-gray-400 dark:text-gray-500 hidden">
+                <i class="fas fa-users text-3xl mb-2"></i>
+                <p class="text-sm">Escribe para buscar clientes</p>
+            </div>
+        </div>
+
+        <!-- Tab: Nuevo Cliente -->
+        <div id="panelNuevo" class="p-6 hidden">
+            <form id="nuevoClienteForm" class="space-y-3">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nombre <span class="text-red-500">*</span></label>
+                    <input type="text" id="nuevoClienteNombre" required class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Nombre completo">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Telefono</label>
+                        <input type="text" id="nuevoClienteTelefono" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="+53 XXXX XXXX">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                        <input type="email" id="nuevoClienteEmail" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="correo@ejemplo.com">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">RNC / CI</label>
+                    <input type="text" id="nuevoClienteRnc" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Identificacion fiscal">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Direccion</label>
+                    <input type="text" id="nuevoClienteDireccion" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Direccion completa">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Notas</label>
+                    <input type="text" id="nuevoClienteNotas" class="w-full px-3 py-2 border border-gray-200 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 dark:bg-gray-700 dark:text-white" placeholder="Notas adicionales (opcional)">
+                </div>
+            </form>
+        </div>
+
+        <div class="px-6 py-4 bg-gray-50 dark:bg-gray-800 flex gap-3">
+            <button onclick="cerrarModalCliente()" class="flex-1 py-2.5 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors font-medium">Cancelar</button>
+            <button id="btnGuardarCliente" onclick="guardarNuevoCliente()" class="flex-1 py-2.5 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors font-medium hidden">
+                <i class="fas fa-save mr-1"></i> Guardar y Seleccionar
+            </button>
         </div>
     </div>
 </div>
@@ -394,11 +514,13 @@ document.addEventListener('DOMContentLoaded', function() {
         btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Procesando...';
 
         try {
-            const res = await postData('{% url "ajax_procesar_venta" %}', { metodo_pago: metodoPago });
+            const clienteId = document.getElementById('clienteId').value;
+            const res = await postData('{% url "ajax_procesar_venta" %}', { metodo_pago: metodoPago, cliente_id: clienteId || '' });
             cerrarConfirmacion();
             if (res.success) {
                 carrito = {};
                 renderCarrito();
+                clearCliente();
                 document.getElementById('successTicket').textContent = 'Ticket: ' + res.ticket;
                 document.getElementById('successTotal').textContent = '$' + res.total;
                 document.getElementById('successModal').classList.remove('hidden');
@@ -413,6 +535,153 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     window.cerrarSuccess = function() { document.getElementById('successModal').classList.add('hidden'); };
+
+    // Customer Modal
+    let clienteSearchTimeout;
+
+    window.abrirModalCliente = function() {
+        document.getElementById('clienteModal').classList.remove('hidden');
+        document.getElementById('mobileCartModal').classList.add('hidden');
+        switchClienteTab('existente');
+        document.getElementById('modalClienteSearch').value = '';
+        document.getElementById('modalClienteResults').innerHTML = '';
+        document.getElementById('modalClienteEmpty').classList.remove('hidden');
+        // Reset nuevo form
+        document.getElementById('nuevoClienteForm').reset();
+    };
+
+    window.cerrarModalCliente = function() {
+        document.getElementById('clienteModal').classList.add('hidden');
+        clearTimeout(clienteSearchTimeout);
+    };
+
+    window.switchClienteTab = function(tab) {
+        const tabExistente = document.getElementById('tabExistente');
+        const tabNuevo = document.getElementById('tabNuevo');
+        const panelExistente = document.getElementById('panelExistente');
+        const panelNuevo = document.getElementById('panelNuevo');
+        const btnGuardar = document.getElementById('btnGuardarCliente');
+
+        if (tab === 'existente') {
+            tabExistente.className = 'flex-1 px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20';
+            tabNuevo.className = 'flex-1 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300';
+            panelExistente.classList.remove('hidden');
+            panelNuevo.classList.add('hidden');
+            btnGuardar.classList.add('hidden');
+        } else {
+            tabNuevo.className = 'flex-1 px-4 py-3 text-sm font-medium text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400 bg-primary-50 dark:bg-primary-900/20';
+            tabExistente.className = 'flex-1 px-4 py-3 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300';
+            panelNuevo.classList.remove('hidden');
+            panelExistente.classList.add('hidden');
+            btnGuardar.classList.remove('hidden');
+        }
+    };
+
+    // Search existing customer in modal
+    const modalSearch = document.getElementById('modalClienteSearch');
+    if (modalSearch) {
+        modalSearch.addEventListener('input', function() {
+            clearTimeout(clienteSearchTimeout);
+            const query = this.value.trim();
+            if (query.length < 2) {
+                document.getElementById('modalClienteResults').innerHTML = '';
+                document.getElementById('modalClienteEmpty').classList.remove('hidden');
+                return;
+            }
+            clienteSearchTimeout = setTimeout(async () => {
+                try {
+                    const res = await fetch('{% url "ajax_buscar_cliente" %}?q=' + encodeURIComponent(query), {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    const data = await res.json();
+                    if (data.success && data.clientes.length) {
+                        const html = data.clientes.map(c => `
+                            <button type="button" onclick="selectCliente(${c.id}, '${c.nombre.replace(/'/g, "\\'")}', '${c.telefono ? c.telefono.replace(/'/g, "\\'") : ''}')"
+                                class="w-full px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-700 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <p class="text-sm font-semibold text-gray-900 dark:text-white">${c.nombre}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">${c.telefono ? '<i class="fas fa-phone mr-1"></i>' + c.telefono : 'Sin telefono'} ${c.email ? ' • <i class="fas fa-envelope mr-1"></i>' + c.email : ''}</p>
+                            </button>
+                        `).join('');
+                        document.getElementById('modalClienteResults').innerHTML = html;
+                        document.getElementById('modalClienteEmpty').classList.add('hidden');
+                    } else {
+                        document.getElementById('modalClienteResults').innerHTML = '';
+                        document.getElementById('modalClienteEmpty').classList.remove('hidden');
+                        document.getElementById('modalClienteEmpty').querySelector('p').textContent = 'No se encontraron clientes';
+                    }
+                } catch (e) { console.error('Error buscando cliente:', e); }
+            }, 300);
+        });
+    }
+
+    window.selectCliente = function(id, nombre, telefono) {
+        document.getElementById('clienteId').value = id;
+        document.getElementById('cartClienteNombre').textContent = nombre;
+        let detalle = '';
+        if (telefono) detalle += '<i class="fas fa-phone mr-1"></i>' + telefono;
+        document.getElementById('cartClienteDetalle').innerHTML = detalle;
+
+        // Toggle visibility
+        document.getElementById('cartClienteSection').classList.add('hidden');
+        document.getElementById('mobileClienteSection').classList.add('hidden');
+        document.getElementById('cartClienteInfo').classList.remove('hidden');
+        document.getElementById('mobileClienteInfo').classList.remove('hidden');
+
+        cerrarModalCliente();
+    };
+
+    window.clearCliente = function() {
+        document.getElementById('clienteId').value = '';
+        document.getElementById('cartClienteSection').classList.remove('hidden');
+        document.getElementById('mobileClienteSection').classList.remove('hidden');
+        document.getElementById('cartClienteInfo').classList.add('hidden');
+        document.getElementById('mobileClienteInfo').classList.add('hidden');
+    };
+
+    // Create new customer
+    window.guardarNuevoCliente = async function() {
+        const nombre = document.getElementById('nuevoClienteNombre').value.trim();
+        if (!nombre) {
+            alert('El nombre es obligatorio');
+            document.getElementById('nuevoClienteNombre').focus();
+            return;
+        }
+
+        const btn = document.getElementById('btnGuardarCliente');
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Guardando...';
+
+        const formData = new FormData();
+        formData.append('nombre', nombre);
+        formData.append('telefono', document.getElementById('nuevoClienteTelefono').value.trim());
+        formData.append('email', document.getElementById('nuevoClienteEmail').value.trim());
+        formData.append('rnc', document.getElementById('nuevoClienteRnc').value.trim());
+        formData.append('direccion', document.getElementById('nuevoClienteDireccion').value.trim());
+        formData.append('notas', document.getElementById('nuevoClienteNotas').value.trim());
+
+        try {
+            const res = await fetch('{% url "cliente_create_ajax" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': getCsrfToken(),
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            });
+            const data = await res.json();
+            if (data.success) {
+                selectCliente(data.id, data.nombre, data.telefono || '');
+                cerrarModalCliente();
+            } else {
+                alert(data.error || 'Error al crear el cliente');
+            }
+        } catch (e) {
+            alert('Error de conexion');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-save mr-1"></i> Guardar y Seleccionar';
+    };
 
     renderCarrito();
 });

@@ -40,12 +40,10 @@ urlpatterns = [
     path('', include('licencias.urls')),
 ]
 
-# Serve media files ALWAYS (not just when DEBUG=True).
+# Serve static and media files ALWAYS (not just when DEBUG=True).
 # The static() helper returns [] when DEBUG=False, so we must use
 # re_path + static_serve directly for offline standalone installation.
 urlpatterns += [
+    re_path(r'^static/(?P<path>.*)$', static_serve, {'document_root': settings.STATIC_ROOT}),
     re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': settings.MEDIA_ROOT}),
 ]
-
-if settings.DEBUG:
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -18,12 +18,13 @@ def _generar_ticket(venta):
 
 
 @transaction.atomic
-def procesar_venta(*, metodo_pago, items, cajero=""):
+def procesar_venta(*, metodo_pago, items, cajero="", cliente_id=None):
     """
     Registra una venta completa dentro de una transaccion atomica.
 
     items: lista de dicts con llaves `producto` y `cantidad`.
             Los productos deben estar bloqueados con select_for_update.
+    cliente_id: ID del cliente (opcional, null para venta sin cliente)
 
     Retorna: instancia de Venta
 
@@ -55,6 +56,7 @@ def procesar_venta(*, metodo_pago, items, cajero=""):
         metodo_pago=metodo_pago,
         total_pagado=Decimal("0"),
         cajero=cajero,
+        cliente_id=cliente_id if cliente_id else None,
     )
 
     if cajero:

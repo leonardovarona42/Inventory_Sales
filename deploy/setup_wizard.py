@@ -912,26 +912,33 @@ except Exception as e:
             else:
                 self._log("  ✅ psycopg verificado")
 
-            self._log("[5/8] Configurando .env...")
+            self._log("[5/10] Configurando .env...")
             self._create_env_file(project_dir)
 
-            self._log("[6/8] Ejecutando migraciones...")
+            self._log("[6/10] Ejecutando migraciones...")
             migrate_result = self._run_django_cmd_verbose(python_exe, project_dir, "migrate", "--verbosity", "2")
             if migrate_result:
                 self._log("  ✅ Migraciones completadas")
             else:
                 self._log("  ⚠️ Migraciones con warnings")
 
-            self._log("[7/8] Creando administrador...")
+            self._log("[7/10] Recolectando archivos estaticos...")
+            collect_result = self._run_django_cmd_verbose(python_exe, project_dir, "collectstatic", "--noinput", "--verbosity", "1")
+            if collect_result:
+                self._log("  ✅ Archivos estaticos listos")
+            else:
+                self._log("  ⚠️ Archivos estaticos con warnings")
+
+            self._log("[8/10] Creando administrador...")
             self._create_superuser(python_exe, project_dir)
 
             if self.config.get("license_key") and not self.config.get("license_later"):
-                self._log("[8/9] Activando licencia...")
+                self._log("[9/10] Activando licencia...")
                 self._activate_license(python_exe, project_dir, self.config["license_key"])
             else:
-                self._log("[8/9] Licencia: activar mas tarde desde el sistema")
+                self._log("[9/10] Licencia: activar mas tarde desde el sistema")
 
-            self._log("[9/9] Configurando servicio Windows...")
+            self._log("[10/10] Configurando servicio Windows...")
             self._create_service(install_dir, venv_path, project_dir)
 
             self._create_desktop_shortcut(install_dir)

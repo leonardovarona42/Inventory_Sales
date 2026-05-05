@@ -6,15 +6,18 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, redirect
+from django.urls import reverse_lazy
 from django.views.decorators.http import require_POST
-from django.views.generic import DetailView, ListView
+from django.views.generic import DetailView, ListView, CreateView, UpdateView, DeleteView
 
 from productos.models import Producto
 
-from .models import Venta
+from .models import Venta, DetalleVenta, Cliente
 from .services import procesar_venta, cancelar_venta
+from .forms import ClienteForm
 from utils import IsCajeroOrAbove, IsAdminUser, _tiene_rol
 
 logger = logging.getLogger(__name__)
@@ -33,7 +36,7 @@ class VentaListView(LoginRequiredMixin, IsCajeroOrAbove, ListView):
     paginate_by = 20
 
     def get_queryset(self):
-        qs = Venta.objects.select_related('cajero_user').all()
+        qs = Venta.objects.select_related('cajero_user', 'cliente').all()
         if not _es_admin(self.request.user):
             qs = qs.filter(cajero=self.request.user.username)
         return qs.order_by('-fecha_venta')
@@ -43,6 +46,9 @@ class VentaDetailView(LoginRequiredMixin, IsCajeroOrAbove, DetailView):
     model = Venta
     template_name = 'ventas/venta_detail.html'
     context_object_name = 'venta'
+
+    def get_queryset(self):
+        return Venta.objects.select_related('cajero_user', 'cliente').all()
 
     def test_func(self):
         venta = self.get_object()
@@ -145,13 +151,19 @@ def ajax_procesar_venta(request):
         return JsonResponse({"success": False, "error": "Carrito vacio"})
 
     metodo_pago = request.POST.get("metodo_pago", "efectivo")
+    cliente_id = _parse_int(request.POST.get("cliente_id"))
     items = []
     for item_data in carrito.values():
         producto = get_object_or_404(Producto, id=item_data["id"])
         items.append({"producto": producto, "cantidad": item_data["cantidad"]})
 
     try:
-        venta = procesar_venta(metodo_pago=metodo_pago, items=items, cajero=request.user.username)
+        venta = procesar_venta(
+            metodo_pago=metodo_pago,
+            items=items,
+            cajero=request.user.username,
+            cliente_id=cliente_id,
+        )
     except ValidationError as exc:
         return JsonResponse({"success": False, "error": str(exc)})
     except Exception as exc:
@@ -182,4 +194,96 @@ def ajax_cancelar_venta(request, pk):
         logger.exception("Error cancelando venta %s: %s", venta_id, exc)
         return JsonResponse({"success": False, "error": "Error interno al cancelar la venta"}, status=500)
     return JsonResponse({"success": True})
+
+
+@login_required
+def ajax_buscar_cliente(request):
+    if not _usuario_puede_vender(request.user):
+        return JsonResponse({"success": False, "error": "No autorizado"}, status=403)
+
+    query = request.GET.get("q", "").strip()
+    if len(query) < 2:
+        return JsonResponse({"success": False, "error": "Ingrese al menos 2 caracteres"})
+
+    clientes = Cliente.objects.filter(activa=True, nombre__icontains=query).values("id", "nombre", "telefono", "email")[:10]
+    return JsonResponse({"success": True, "clientes": list(clientes)})
+
+
+class ClienteListView(LoginRequiredMixin, IsCajeroOrAbove, ListView):
+    model = Cliente
+    template_name = 'ventas/cliente_list.html'
+    context_object_name = 'clientes'
+    paginate_by = 20
+
+    def get_queryset(self):
+        qs = Cliente.objects.annotate(num_ventas=Count('ventas'))
+        query = self.request.GET.get('q', '').strip()
+        if query:
+            qs = qs.filter(nombre__icontains=query)
+        return qs
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['total'] = Cliente.objects.count()
+        ctx['activos'] = Cliente.objects.filter(activa=True).count()
+        return ctx
+
+
+class ClienteCreateView(LoginRequiredMixin, IsAdminUser, CreateView):
+    model = Cliente
+    form_class = ClienteForm
+    template_name = 'ventas/cliente_form.html'
+    success_url = reverse_lazy('cliente_list')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['page_title'] = 'Nuevo Cliente'
+        return ctx
+
+
+class ClienteUpdateView(LoginRequiredMixin, IsAdminUser, UpdateView):
+    model = Cliente
+    form_class = ClienteForm
+    template_name = 'ventas/cliente_form.html'
+    success_url = reverse_lazy('cliente_list')
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['page_title'] = 'Editar Cliente'
+        return ctx
+
+
+class ClienteDeleteView(LoginRequiredMixin, IsAdminUser, DeleteView):
+    model = Cliente
+    template_name = 'ventas/cliente_confirm_delete.html'
+    success_url = reverse_lazy('cliente_list')
+
+
+@login_required
+@require_POST
+def ajax_crear_cliente(request):
+    if not _usuario_puede_vender(request.user):
+        return JsonResponse({"success": False, "error": "No autorizado"}, status=403)
+
+    nombre = request.POST.get("nombre", "").strip()
+    if not nombre:
+        return JsonResponse({"success": False, "error": "El nombre es obligatorio"})
+
+    try:
+        cliente = Cliente.objects.create(
+            nombre=nombre,
+            telefono=request.POST.get("telefono", "").strip(),
+            email=request.POST.get("email", "").strip(),
+            rnc=request.POST.get("rnc", "").strip(),
+            direccion=request.POST.get("direccion", "").strip(),
+            notas=request.POST.get("notas", "").strip(),
+        )
+        return JsonResponse({
+            "success": True,
+            "id": cliente.id,
+            "nombre": cliente.nombre,
+            "telefono": cliente.telefono,
+        })
+    except Exception as exc:
+        return JsonResponse({"success": False, "error": str(exc)})
 
