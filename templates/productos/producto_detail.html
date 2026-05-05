@@ -40,11 +40,11 @@
             </div>
             <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Precio Venta</p>
-                <p class="text-2xl font-bold text-green-600 dark:text-green-400">${{ producto.precio_venta|floatformat:2 }}</p>
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400">{{ config.simbolo_moneda }}{{ producto.precio_venta|floatformat:2 }}</p>
             </div>
             <div class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg">
                 <p class="text-xs text-gray-500 dark:text-gray-400 uppercase">Valor Total</p>
-                <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">${{ valor_total|floatformat:2 }}</p>
+                <p class="text-2xl font-bold text-primary-600 dark:text-primary-400">{{ config.simbolo_moneda }}{{ valor_total|floatformat:2 }}</p>
             </div>
         </div>
 
@@ -87,7 +87,7 @@
 
         <!-- Price Cost -->
         <div class="px-6 py-3 border-t border-gray-100 dark:border-gray-700">
-            <p class="text-sm text-gray-500 dark:text-gray-400">Precio Costo: <span class="font-medium text-gray-900 dark:text-white">${{ producto.precio_costo|floatformat:2 }}</span></p>
+            <p class="text-sm text-gray-500 dark:text-gray-400">Precio Costo: <span class="font-medium text-gray-900 dark:text-white">{{ config.simbolo_moneda }}{{ producto.precio_costo|floatformat:2 }}</span></p>
         </div>
 
         <!-- Movements -->

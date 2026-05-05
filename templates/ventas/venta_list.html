@@ -32,7 +32,7 @@
                         </span>
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <span class="font-semibold text-gray-900 dark:text-white">${{ venta.total_pagado|floatformat:2 }}</span>
+                        <span class="font-semibold text-gray-900 dark:text-white">{{ config.simbolo_moneda }}{{ venta.total_pagado|floatformat:2 }}</span>
                     </td>
                     <td class="px-6 py-4 text-center">
                         <a href="{% url 'venta_detail' venta.id %}" class="inline-flex items-center px-3 py-1.5 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-800 dark:hover:text-primary-300 hover:bg-primary-50 rounded-lg transition-colors">

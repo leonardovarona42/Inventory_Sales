@@ -15,9 +15,9 @@ from django.views.generic import DetailView, ListView, CreateView, UpdateView, D
 
 from productos.models import Producto
 
-from .models import Venta, DetalleVenta, Cliente
+from .models import Venta, DetalleVenta, Cliente, ConfiguracionSistema
 from .services import procesar_venta, cancelar_venta
-from .forms import ClienteForm
+from .forms import ClienteForm, ConfiguracionForm
 from utils import IsCajeroOrAbove, IsAdminUser, _tiene_rol
 
 logger = logging.getLogger(__name__)
@@ -286,4 +286,24 @@ def ajax_crear_cliente(request):
         })
     except Exception as exc:
         return JsonResponse({"success": False, "error": str(exc)})
+
+
+class ConfiguracionUpdateView(LoginRequiredMixin, IsAdminUser, UpdateView):
+    model = ConfiguracionSistema
+    form_class = ConfiguracionForm
+    template_name = 'ventas/configuracion_form.html'
+    success_url = reverse_lazy('configuracion_update')
+
+    def get_object(self, queryset=None):
+        obj, _ = ConfiguracionSistema.objects.get_or_create(pk=1)
+        return obj
+
+    def get_context_data(self, **kwargs):
+        ctx = super().get_context_data(**kwargs)
+        ctx['page_title'] = 'Configuracion del Sistema'
+        return ctx
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Configuracion actualizada correctamente.')
+        return super().form_valid(form)
 

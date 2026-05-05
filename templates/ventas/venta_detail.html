@@ -52,15 +52,15 @@
                     <tr>
                         <td class="py-3">{{ detalle.id_producto.nombre }}</td>
                         <td class="py-3 text-center">{{ detalle.cantidad }}</td>
-                        <td class="py-3 text-right">${{ detalle.precio_unitario|floatformat:2 }}</td>
-                        <td class="py-3 text-right font-medium">${{ detalle.cantidad|floatformat:0|add:"0"|mul:detalle.precio_unitario|floatformat:2 }}</td>
+                        <td class="py-3 text-right">{{ config.simbolo_moneda }}{{ detalle.precio_unitario|floatformat:2 }}</td>
+                        <td class="py-3 text-right font-medium">{{ config.simbolo_moneda }}{{ detalle.cantidad|floatformat:0|add:"0"|mul:detalle.precio_unitario|floatformat:2 }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
                 <tfoot>
                     <tr class="border-t-2 border-gray-200 dark:border-gray-700">
                         <td colspan="3" class="py-4 text-right font-semibold text-lg">Total</td>
-                        <td class="py-4 text-right font-bold text-lg text-green-600 dark:text-green-400">${{ venta.total_pagado|floatformat:2 }}</td>
+                        <td class="py-4 text-right font-bold text-lg text-green-600 dark:text-green-400">{{ config.simbolo_moneda }}{{ venta.total_pagado|floatformat:2 }}</td>
                     </tr>
                 </tfoot>
             </table>
