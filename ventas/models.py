@@ -6,23 +6,23 @@ from decimal import Decimal
 
 
 class ConfiguracionSistema(models.Model):
-    """Configuracion global del sistema (singleton)"""
+    """Configuración global del sistema (singleton)"""
     nombre_negocio = models.CharField(max_length=150, default="Mi Negocio", verbose_name="Nombre del Negocio")
     rnc_negocio = models.CharField(max_length=50, blank=True, default="", verbose_name="RNC del Negocio")
-    direccion = models.TextField(blank=True, default="", verbose_name="Direccion")
-    telefono = models.CharField(max_length=30, blank=True, default="", verbose_name="Telefono")
+    direccion = models.TextField(blank=True, default="", verbose_name="Dirección")
+    telefono = models.CharField(max_length=30, blank=True, default="", verbose_name="Teléfono")
     email = models.EmailField(blank=True, default="", verbose_name="Email")
-    simbolo_moneda = models.CharField(max_length=5, default="RD$", verbose_name="Simbolo de Moneda")
+    simbolo_moneda = models.CharField(max_length=5, default="RD$", verbose_name="Símbolo de Moneda")
     tasa_impuesto = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"), verbose_name="Tasa de Impuesto (%)")
     mensaje_recibo_superior = models.TextField(blank=True, default="", verbose_name="Mensaje Recibo (superior)", help_text="Texto que aparece arriba del recibo")
     mensaje_recibo_inferior = models.TextField(blank=True, default="", verbose_name="Mensaje Recibo (inferior)", help_text="Texto que aparece abajo del recibo")
-    pie_pagina = models.CharField(max_length=200, blank=True, default="Gracias por su compra", verbose_name="Pie de pagina")
+    pie_pagina = models.CharField(max_length=200, blank=True, default="Gracias por su compra", verbose_name="Pie de página")
     logo = models.ImageField(upload_to="logos/", blank=True, null=True, verbose_name="Logo del Negocio")
     actualizada_en = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = 'Configuracion del Sistema'
-        verbose_name_plural = 'Configuracion del Sistema'
+        verbose_name = 'Configuración del Sistema'
+        verbose_name_plural = 'Configuración del Sistema'
 
     def __str__(self):
         return self.nombre_negocio

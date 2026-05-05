@@ -14,7 +14,7 @@ class ConfiguracionForm(forms.ModelForm):
         widgets = {
             'nombre_negocio': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Mi Negocio'}),
             'rnc_negocio': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'RNC'}),
-            'direccion': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Direccion del negocio'}),
+            'direccion': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Dirección del negocio'}),
             'telefono': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '+1 XXX XXX XXXX'}),
             'email': forms.EmailInput(attrs={'class': 'input-field', 'placeholder': 'correo@negocio.com'}),
             'simbolo_moneda': forms.TextInput(attrs={'class': 'input-field w-20', 'placeholder': 'RD$'}),
@@ -34,7 +34,7 @@ class ClienteForm(forms.ModelForm):
             'nombre': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'Nombre completo'}),
             'email': forms.EmailInput(attrs={'class': 'input-field', 'placeholder': 'correo@ejemplo.com'}),
             'telefono': forms.TextInput(attrs={'class': 'input-field', 'placeholder': '+53 XXXX XXXX'}),
-            'direccion': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Direccion completa'}),
+            'direccion': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Dirección completa'}),
             'rnc': forms.TextInput(attrs={'class': 'input-field', 'placeholder': 'RNC o CI'}),
             'notas': forms.Textarea(attrs={'class': 'input-field', 'rows': 2, 'placeholder': 'Notas adicionales'}),
             'activa': forms.CheckboxInput(attrs={'class': 'rounded'}),

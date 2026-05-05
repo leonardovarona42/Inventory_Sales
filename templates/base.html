@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Gestion de Ventas e Inventario{% endblock %}</title>
+    <title>{% block title %}Gestión de Ventas e Inventario{% endblock %}</title>
     {% load static %}
     <script src="{% static 'js/tailwind.js' %}"></script>
     <script>
@@ -62,7 +62,7 @@
                 </div>
                 <div>
                     <h1 class="text-gray-900 dark:text-white font-bold text-sm truncate">{{ config.nombre_negocio|default:"Mi Negocio" }}</h1>
-                    <p class="text-gray-500 dark:text-gray-400 text-xs">Sistema de Gestion</p>
+                    <p class="text-gray-500 dark:text-gray-400 text-xs">Sistema de Gestión</p>
                 </div>
             </div>
 
@@ -96,7 +96,7 @@
                     <i class="fas fa-boxes-stacked w-5 text-center"></i><span>Productos</span>
                 </a>
                 <a href="{% url 'categoria_list' %}" class="sidebar-link {% if 'categoria' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="fas fa-layer-group w-5 text-center"></i><span>Categorias</span>
+                    <i class="fas fa-layer-group w-5 text-center"></i><span>Categorías</span>
                 </a>
                 <a href="{% url 'movimiento_list' %}" class="sidebar-link {% if 'movimiento' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-truck-ramp-box w-5 text-center"></i><span>Movimientos</span>
@@ -115,12 +115,12 @@
                     <i class="fas fa-chart-line w-5 text-center"></i><span>Dashboard</span>
                 </a>
                 <a href="{% url 'inventario_valoracion' %}" class="sidebar-link {% if 'inventario_valoracion' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="fas fa-coins w-5 text-center"></i><span>Valoracion Inventario</span>
+                    <i class="fas fa-coins w-5 text-center"></i><span>Valoración Inventario</span>
                 </a>
                 {% endif %}
 
                 {% if user.is_superuser or user.groups.all.0.name == 'Superadmin' %}
-                <div class="sidebar-section">Administracion</div>
+                <div class="sidebar-section">Administración</div>
                 <a href="{% url 'usuario_list' %}" class="sidebar-link {% if 'usuario' in request.resolver_match.url_name %}active{% endif %}">
                     <i class="fas fa-users-gear w-5 text-center"></i><span>Usuarios</span>
                 </a>
@@ -131,7 +131,7 @@
                     <i class="fas fa-circle-info w-5 text-center"></i><span>Acerca de</span>
                 </a>
                 <a href="{% url 'configuracion_update' %}" class="sidebar-link {% if 'configuracion' in request.resolver_match.url_name %}active{% endif %}">
-                    <i class="fas fa-cog w-5 text-center"></i><span>Configuracion</span>
+                    <i class="fas fa-cog w-5 text-center"></i><span>Configuración</span>
                 </a>
                 {% endif %}
             </nav>
@@ -143,7 +143,7 @@
                 <form method="post" action="{% url 'logout' %}" class="mt-1">
                     {% csrf_token %}
                     <button type="submit" class="sidebar-link w-full text-red-500 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-500/10">
-                        <i class="fas fa-right-from-bracket w-5 text-center"></i><span>Cerrar Sesion</span>
+                        <i class="fas fa-right-from-bracket w-5 text-center"></i><span>Cerrar Sesión</span>
                     </button>
                 </form>
             </div>

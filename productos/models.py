@@ -23,8 +23,8 @@ class Categoria(models.Model):
 
     class Meta:
         ordering = ['orden', 'nombre']
-        verbose_name = 'Categoria'
-        verbose_name_plural = 'Categorias'
+        verbose_name = 'Categoría'
+        verbose_name_plural = 'Categorías'
 
     def __str__(self):
         if self.padre:
@@ -70,7 +70,7 @@ class Producto(models.Model):
 
     nombre = models.CharField(max_length=150)
     descripcion = models.TextField(blank=True)
-    codigo_barras = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True, verbose_name="Codigo de Barras")
+    codigo_barras = models.CharField(max_length=50, unique=True, null=True, blank=True, db_index=True, verbose_name="Código de Barras")
     lote = models.CharField(max_length=100, blank=True, default="", verbose_name="Lote")
     fecha_vencimiento = models.DateField(blank=True, null=True, verbose_name="Fecha de Vencimiento")
     unidad_medida = models.CharField(max_length=20, choices=UNIDADES_MEDIDA, default=UNIDAD)

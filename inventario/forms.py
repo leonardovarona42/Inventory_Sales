@@ -7,8 +7,8 @@ class AjusteStockForm(forms.Form):
     """Formulario para ajustes manuales de inventario"""
     MOTIVO_CHOICES = [
         (MovimientoStock.AJUSTE, 'Ajuste de inventario'),
-        (MovimientoStock.MERMA, 'Merma/Perdida'),
-        (MovimientoStock.DEVOLUCION, 'Devolucion'),
+        (MovimientoStock.MERMA, 'Merma/Pérdida'),
+        (MovimientoStock.DEVOLUCION, 'Devolución'),
     ]
 
     producto = forms.ModelChoiceField(
@@ -48,6 +48,6 @@ class AjusteStockForm(forms.Form):
         widget=forms.Textarea(attrs={
             'class': 'input-field',
             'rows': 3,
-            'placeholder': 'Descripcion del ajuste...',
+            'placeholder': 'Descripción del ajuste...',
         }),
     )

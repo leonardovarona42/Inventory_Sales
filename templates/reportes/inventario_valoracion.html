@@ -8,7 +8,7 @@
     <!-- Header -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Valoracion de Inventario</h1>
+            <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Valoración de Inventario</h1>
             <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Valor total del inventario a costo y precio de venta</p>
         </div>
         <a href="{% url 'inventario_valoracion_export' %}" class="inline-flex items-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium shadow-sm">
@@ -26,7 +26,7 @@
                 </div>
             </div>
             <p class="text-2xl font-bold text-blue-600 dark:text-blue-400">{{ config.simbolo_moneda }}{{ valor_costo_total|floatformat:2 }}</p>
-            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Inversion total</p>
+            <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Inversión total</p>
         </div>
 
         <div class="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-5">
