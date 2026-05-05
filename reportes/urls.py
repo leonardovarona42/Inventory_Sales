@@ -3,4 +3,6 @@ from . import views
 
 urlpatterns = [
     path('dashboard/', views.DashboardView.as_view(), name='dashboard'),
+    path('inventario-valoracion/', views.InventarioValoracionView.as_view(), name='inventario_valoracion'),
+    path('inventario-valoracion/export/', views.InventarioValoracionView.as_view().export_csv, name='inventario_valoracion_export'),
 ]

@@ -114,6 +114,9 @@
                 <a href="{% url 'dashboard' %}" class="sidebar-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
                     <i class="fas fa-chart-line w-5 text-center"></i><span>Dashboard</span>
                 </a>
+                <a href="{% url 'inventario_valoracion' %}" class="sidebar-link {% if 'inventario_valoracion' in request.resolver_match.url_name %}active{% endif %}">
+                    <i class="fas fa-coins w-5 text-center"></i><span>Valoracion Inventario</span>
+                </a>
                 {% endif %}
 
                 {% if user.is_superuser or user.groups.all.0.name == 'Superadmin' %}
