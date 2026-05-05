@@ -144,34 +144,39 @@ class InventarioValoracionView(LoginRequiredMixin, UserPassesTestMixin, Template
 
         return context
 
-    def export_csv(self, request, *args, **kwargs):
-        """Exportar valoracion a CSV"""
-        from django.utils.text import slugify
-        import csv
 
-        productos = Producto.objects.filter(stock_actual__gt=0).order_by('nombre')
+def export_valoracion_csv(request):
+    """Exportar valoracion a CSV"""
+    import csv
+    from django.utils.text import slugify
 
-        response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename="valoracion_inventario.csv"'
+    if not (request.user.is_staff or request.user.groups.filter(name__in=['Administrador', 'Superadmin']).exists()):
+        from django.http import HttpResponseForbidden
+        return HttpResponseForbidden("No autorizado")
 
-        writer = csv.writer(response)
-        writer.writerow(['Producto', 'Categoria', 'Proveedor', 'Stock', 'Precio Costo', 'Precio Venta', 'Valor Costo', 'Valor Venta', 'Margen'])
+    productos = Producto.objects.filter(stock_actual__gt=0).order_by('nombre')
 
-        for p in productos:
-            cats = ', '.join(c.nombre for c in p.categorias.all())
-            valor_costo = p.stock_actual * p.precio_costo
-            valor_venta = p.stock_actual * p.precio_venta
-            margen = valor_venta - valor_costo
-            writer.writerow([
-                p.nombre,
-                cats,
-                p.proveedor.nombre if p.proveedor else '-',
-                float(p.stock_actual),
-                float(p.precio_costo),
-                float(p.precio_venta),
-                float(valor_costo),
-                float(valor_venta),
-                float(margen),
-            ])
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="valoracion_inventario.csv"'
 
-        return response
+    writer = csv.writer(response)
+    writer.writerow(['Producto', 'Categoria', 'Proveedor', 'Stock', 'Precio Costo', 'Precio Venta', 'Valor Costo', 'Valor Venta', 'Margen'])
+
+    for p in productos:
+        cats = ', '.join(c.nombre for c in p.categorias.all())
+        valor_costo = p.stock_actual * p.precio_costo
+        valor_venta = p.stock_actual * p.precio_venta
+        margen = valor_venta - valor_costo
+        writer.writerow([
+            p.nombre,
+            cats,
+            p.proveedor.nombre if p.proveedor else '-',
+            float(p.stock_actual),
+            float(p.precio_costo),
+            float(p.precio_venta),
+            float(valor_costo),
+            float(valor_venta),
+            float(margen),
+        ])
+
+    return response
