@@ -104,6 +104,9 @@
                 <a href="{% url 'low_stock' %}" class="sidebar-link {% if request.resolver_match.url_name == 'low_stock' %}active{% endif %}">
                     <i class="fas fa-triangle-exclamation w-5 text-center"></i><span>Stock Bajo</span>
                 </a>
+                <a href="{% url 'ajuste_stock' %}" class="sidebar-link {% if request.resolver_match.url_name == 'ajuste_stock' %}active{% endif %}">
+                    <i class="fas fa-sliders w-5 text-center"></i><span>Ajuste Inventario</span>
+                </a>
                 {% endif %}
 
                 {% if user.is_staff or user.groups.all.0.name == 'Superadmin' %}
