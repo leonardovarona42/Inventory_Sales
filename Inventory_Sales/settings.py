@@ -70,7 +70,7 @@ if DEBUG and env('LICENSE_SECRET', ''):
     )
     DEBUG = False
 
-ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = env('DJANGO_ALLOWED_HOSTS', 'localhost,127.0.0.1,.vercel.app').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
     'https://*.ngrok-free.app',
@@ -104,6 +104,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'axes.middleware.AxesMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -137,16 +138,43 @@ WSGI_APPLICATION = 'Inventory_Sales.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': env('DB_ENGINE', 'django.db.backends.postgresql'),
-        'NAME': env('DB_NAME', 'inventory_sales'),
-        'USER': env('DB_USER', 'postgres'),
-        'PASSWORD': env('DB_PASSWORD', 'postgres'),
-        'HOST': env('DB_HOST', 'localhost'),
-        'PORT': env('DB_PORT', '5432'),
+import re
+
+_db_url = env('DATABASE_URL', '')
+if _db_url:
+    match = re.match(
+        r'^postgres(?:ql)?://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)/(?P<name>.+)$',
+        _db_url
+    )
+    if match:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': match.group('name'),
+                'USER': match.group('user'),
+                'PASSWORD': match.group('password'),
+                'HOST': match.group('host'),
+                'PORT': match.group('port'),
+            }
+        }
+    else:
+        DATABASES = {
+            'default': {
+                'ENGINE': 'django.db.backends.postgresql',
+                'NAME': _db_url.rsplit('/', 1)[-1],
+            }
+        }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('DB_ENGINE', 'django.db.backends.postgresql'),
+            'NAME': env('DB_NAME', 'inventory_sales'),
+            'USER': env('DB_USER', 'postgres'),
+            'PASSWORD': env('DB_PASSWORD', 'postgres'),
+            'HOST': env('DB_HOST', 'localhost'),
+            'PORT': env('DB_PORT', '5432'),
+        }
     }
-}
 
 # Authentication settings
 LOGIN_REDIRECT_URL = '/'
@@ -211,6 +239,11 @@ USE_TZ = True
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
+STORAGES = {
+    'staticfiles': {
+        'BACKEND': 'whitenoise.storage.CompressedManifestStaticFilesStorage',
+    },
+}
 
 # Media files configuration
 MEDIA_URL = 'media/'
