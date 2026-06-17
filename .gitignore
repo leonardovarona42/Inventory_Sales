@@ -31,7 +31,8 @@ db.sqlite3
 # ============================================
 # Media y archivos subidos por usuarios
 # ============================================
-/media/
+/media/*
+!/media/productos/
 /recetas_imagenes/
 /productos_imagenes/
 

@@ -241,6 +241,13 @@ STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_DIRS = [BASE_DIR / 'static']
 STORAGES = {
+    'default': {
+        'BACKEND': 'django.core.files.storage.FileSystemStorage',
+        'OPTIONS': {
+            'location': BASE_DIR / 'media',
+            'base_url': '/media/',
+        },
+    },
     'staticfiles': {
         'BACKEND': 'whitenoise.storage.StaticFilesStorage',
     },
