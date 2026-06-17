@@ -1,7 +1,17 @@
 [project]
 name = "inventory-sales"
+version = "4.0"
+description = "Inventory and Sales Management System"
 requires-python = ">=3.12"
-dependencies = []
+dependencies = [
+    "Django==6.0.4",
+    "django-axes==8.3.1",
+    "Pillow>=12.0.0",
+    "psycopg[binary]>=3.3.0",
+    "gunicorn>=21.0.0",
+    "whitenoise>=6.6.0",
+    "python-dotenv>=1.2.0",
+]
 
 [tool.pytest.ini_options]
 DJANGO_SETTINGS_MODULE = "Inventory_Sales.settings"
