@@ -2,7 +2,7 @@
 name = "inventory-sales"
 version = "4.0"
 description = "Inventory and Sales Management System"
-requires-python = ">=3.12,<3.14"
+requires-python = ">=3.13,<3.14"
 dependencies = [
     "Django==6.0.4",
     "django-axes==8.3.1",
