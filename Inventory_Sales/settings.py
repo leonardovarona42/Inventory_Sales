@@ -139,24 +139,25 @@ WSGI_APPLICATION = 'Inventory_Sales.wsgi.application'
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
 import re
+from urllib.parse import urlparse, unquote
 
 _db_url = env('DATABASE_URL', '')
 if _db_url:
-    match = re.match(
-        r'^postgres(?:ql)?://(?P<user>[^:]+):(?P<password>[^@]+)@(?P<host>[^:]+):(?P<port>\d+)/(?P<name>.+)$',
-        _db_url
-    )
-    if match:
+    parsed = urlparse(_db_url)
+    if parsed.scheme and parsed.hostname:
         DATABASES = {
             'default': {
                 'ENGINE': 'django.db.backends.postgresql',
-                'NAME': match.group('name'),
-                'USER': match.group('user'),
-                'PASSWORD': match.group('password'),
-                'HOST': match.group('host'),
-                'PORT': match.group('port'),
+                'NAME': unquote(parsed.path.lstrip('/')),
+                'USER': unquote(parsed.username) if parsed.username else '',
+                'PASSWORD': unquote(parsed.password) if parsed.password else '',
+                'HOST': parsed.hostname,
+                'PORT': parsed.port or '5432',
+                'OPTIONS': {},
             }
         }
+        if parsed.query and 'sslmode=require' in parsed.query:
+            DATABASES['default']['OPTIONS']['sslmode'] = 'require'
     else:
         DATABASES = {
             'default': {
